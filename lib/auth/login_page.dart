@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/auth/forget_page.dart';
-import 'package:todo_app/pages/home/dashboard_page.dart';
+import 'package:todo_app/pages/dashboard/dashboard_page.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {

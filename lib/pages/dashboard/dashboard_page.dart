@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/models/label_item_model.dart';
-import 'package:todo_app/models/project_item_model.dart';
-import 'package:todo_app/models/status_item_model.dart';
+import 'package:todo_app/pages/dashboard/label_item_model.dart';
+import 'package:todo_app/pages/dashboard/project_item_model.dart';
+import 'package:todo_app/pages/dashboard/status_item_model.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
-import 'todo_page.dart';
+import '../todo_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

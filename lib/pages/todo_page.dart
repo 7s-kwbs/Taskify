@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/auth/login_page.dart';
-import 'completed_page.dart';
-import '../../models/todo_model.dart';
+import 'completed_page/completed_page.dart';
+import '../models/todo_model.dart';
 import 'package:todo_app/widgets/delete_dialog.dart';
 
 class TodoPage extends StatefulWidget {
