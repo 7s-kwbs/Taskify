@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:todo_app/pages/dashboard/label_item_model.dart';
 import 'package:todo_app/pages/dashboard/project_item_model.dart';
 import 'package:todo_app/pages/dashboard/status_item_model.dart';
+import 'package:todo_app/pages/my_task/my_task_screen.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
 import '../todo_page.dart';
@@ -60,7 +62,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-          const DashboardHeader(),
+           DashboardHeader(title: "Dashboard", isDashboard: true,),
           Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -68,12 +70,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _dashboardCard(title: "List", icon: Icons.list_outlined),
+                    _dashboardCard(title: "List", icon: Icons.list_outlined, onTap: ()=> Get.to(()=> MytaskScreen())),
                     _dashboardCard(
                       title: "Calendar",
                       icon: Icons.calendar_month,
+                      onTap: (){},
                     ),
-                    _dashboardCard(title: "Reports", icon: Icons.view_kanban),
+                    _dashboardCard(title: "Reports", icon: Icons.view_kanban, onTap: (){}),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -165,7 +168,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _dashboardCard({required String title, required IconData icon}) {
+  Widget _dashboardCard({required String title, required IconData icon, required onTap}) {
     return Column(
       children: [
         Text(
@@ -177,14 +180,17 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          width: 140,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            width: 140,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(icon, color: const Color(0xFF666AF6), size: 42),
           ),
-          child: Icon(icon, color: const Color(0xFF666AF6), size: 42),
         ),
       ],
     );

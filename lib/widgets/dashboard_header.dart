@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class DashboardHeader extends StatelessWidget {
-  const DashboardHeader({super.key});
+class DashboardHeader extends StatefulWidget {  
+  final String title;
+  final bool isDashboard;
+  const DashboardHeader({super.key, required this.title, required this.isDashboard});
+
+  @override
+  State<DashboardHeader> createState() => _DashboardHeaderState();
+}
+
+class _DashboardHeaderState extends State<DashboardHeader> {
+  late DateTime now;
+  late final String month =DateFormat("MMM").format(now);
+  late final String day = DateFormat("d").format(now);
+
+  @override
+  void initState(){
+    super.initState();
+
+    now = DateTime.now();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +46,11 @@ class DashboardHeader extends StatelessWidget {
           Positioned(
             top: 60,
             right: 24,
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 32,
               backgroundColor: Colors.white24,
-              child: Icon(Icons.settings, color: Colors.white, size: 32,),
+              child: Icon( widget.isDashboard? Icons.settings: Icons.menu
+              , color: Colors.white, size: 32,),
             ),
           ),
           Padding(
@@ -38,14 +58,14 @@ class DashboardHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(
-                  radius: 28,
+                 CircleAvatar(
+                  radius: 20,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: Colors.deepPurple),
+                  child: Icon( widget.isDashboard? Icons.person : Icons.grid_view, color: Colors.deepPurple),
                 ),
                 const SizedBox(height: 10,),
                 Text(
-                  "Today, 1 May",
+                  "Today, $day $month",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -53,7 +73,7 @@ class DashboardHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Dashboard",
+                  widget.title,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 28,

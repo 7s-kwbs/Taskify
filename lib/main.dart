@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/auth/login_page.dart';
 import 'package:todo_app/pages/dashboard/dashboard_page.dart';
@@ -9,13 +10,15 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
 Future<bool> checkLogin() async{
   final prefs = await SharedPreferences.getInstance();
   return prefs.getBool("isLoggedIn") ?? false;
 }
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       home: FutureBuilder(future: checkLogin(),
       builder: (context, snapshot){
         if(!snapshot.hasData){
