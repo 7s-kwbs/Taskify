@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 class DashboardHeader extends StatefulWidget {  
   final String title;
   final bool isDashboard;
-  const DashboardHeader({super.key, required this.title, required this.isDashboard});
+  final VoidCallback onTap;
+  const DashboardHeader({super.key, required this.title, required this.isDashboard, required this.onTap});
 
   @override
   State<DashboardHeader> createState() => _DashboardHeaderState();
@@ -46,11 +47,14 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           Positioned(
             top: 60,
             right: 24,
-            child: CircleAvatar(
-              radius: 32,
-              backgroundColor: Colors.white24,
-              child: Icon( widget.isDashboard? Icons.settings: Icons.menu
-              , color: Colors.white, size: 32,),
+            child: InkWell(
+              onTap: widget.onTap,
+              child: CircleAvatar(
+                radius: 32,
+                backgroundColor: Colors.white24,
+                child: Icon( widget.isDashboard? Icons.settings: Icons.menu
+                , color: Colors.white, size: 32,),
+              ),
             ),
           ),
           Padding(
@@ -58,11 +62,14 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.white,
-                  child: Icon( widget.isDashboard? Icons.person : Icons.grid_view, color: Colors.deepPurple),
-                ),
+                 InkWell(
+                  onTap: widget.onTap,
+                   child: CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.white,
+                    child: Icon( widget.isDashboard? Icons.person : Icons.grid_view, color: Colors.deepPurple),
+                                   ),
+                 ),
                 const SizedBox(height: 10,),
                 Text(
                   "Today, $day $month",

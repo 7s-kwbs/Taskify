@@ -62,105 +62,110 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-           DashboardHeader(title: "Dashboard", isDashboard: true,),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _dashboardCard(title: "List", icon: Icons.list_outlined, onTap: ()=> Get.to(()=> MytaskScreen())),
-                    _dashboardCard(
-                      title: "Calendar",
-                      icon: Icons.calendar_month,
-                      onTap: (){},
-                    ),
-                    _dashboardCard(title: "Reports", icon: Icons.view_kanban, onTap: (){}),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Column(
-                  children: [
-                    SectionHeader(
-                      title: "Projects",
-                      expanded: projectExpanded,
-                      onToggle: () =>
-                          setState(() => projectExpanded = !projectExpanded),
-                      onAdd: () {},
-                    ),
-                    if (projectExpanded)
-                      Column(
-                        children: projects
-                            .map(
-                              (p) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 10,
-                                ),
-                                child: ProjectCard(item: p),
-                              ),
-                            )
-                            .toList(),
+           DashboardHeader(title: "Dashboard", isDashboard: true, onTap: (){},),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _dashboardCard(title: "List", icon: Icons.list_outlined, onTap: ()=> Get.to(()=> MytaskScreen()))),
+                      SizedBox(width: 10,),
+                      Expanded(
+                        child: _dashboardCard(
+                          title: "Calendar",
+                          icon: Icons.calendar_month,
+                          onTap: (){},
+                        ),
                       ),
-                    SectionHeader(
-                      title: "Labels",
-                      expanded: labelsExpanded,
-                      onToggle: () =>
-                          setState(() => labelsExpanded = !labelsExpanded),
-                      onAdd: () {},
-                    ),
-                    if (labelsExpanded)
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          // One gap (spacing: 10) sits between the two
-                          // columns, so only subtract it once.
-                          final chipWidth = (constraints.maxWidth - 10) / 2;
-                          return Wrap(
-                            spacing: 10,
-                            runSpacing: 14,
-                            children: labels
-                                .map(
-                                  (label) => SizedBox(
-                                    width: chipWidth,
-                                    child: Labelchip(
-                                      color: label.color,
-                                      title: label.title,
-                                      count: label.count,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          );
-                        },
+                      SizedBox(width: 10,),
+                      Expanded(child: _dashboardCard(title: "Reports", icon: Icons.view_kanban, onTap: (){})),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Column(
+                    children: [
+                      SectionHeader(
+                        title: "Projects",
+                        expanded: projectExpanded,
+                        onToggle: () =>
+                            setState(() => projectExpanded = !projectExpanded),
+                        onAdd: () {},
                       ),
-                    SectionHeader(
-                      title: "Status",
-                      expanded: statusExpanded,
-                      onToggle: () =>
-                          setState(() => statusExpanded = !statusExpanded),
-                      onAdd: () {},
-                    ),
-                    if (statusExpanded)
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: statuses
+                      if (projectExpanded)
+                        Column(
+                          children: projects
                               .map(
-                                (status) => Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: StatusChip(
-                                    color: status.color,
-                                    title: status.title,
+                                (p) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 10,
                                   ),
+                                  child: ProjectCard(item: p),
                                 ),
                               )
                               .toList(),
                         ),
+                      SectionHeader(
+                        title: "Labels",
+                        expanded: labelsExpanded,
+                        onToggle: () =>
+                            setState(() => labelsExpanded = !labelsExpanded),
+                        onAdd: () {},
                       ),
-                  ],
-                ),
-              ],
+                      if (labelsExpanded)
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            // One gap (spacing: 10) sits between the two
+                            // columns, so only subtract it once.
+                            final chipWidth = (constraints.maxWidth - 10) / 2;
+                            return Wrap(
+                              spacing: 10,
+                              runSpacing: 14,
+                              children: labels
+                                  .map(
+                                    (label) => SizedBox(
+                                      width: chipWidth,
+                                      child: Labelchip(
+                                        color: label.color,
+                                        title: label.title,
+                                        count: label.count,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                        ),
+                      SectionHeader(
+                        title: "Status",
+                        expanded: statusExpanded,
+                        onToggle: () =>
+                            setState(() => statusExpanded = !statusExpanded),
+                        onAdd: () {},
+                      ),
+                      if (statusExpanded)
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: statuses
+                                .map(
+                                  (status) => Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: StatusChip(
+                                      color: status.color,
+                                      title: status.title,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -183,8 +188,8 @@ class _DashboardPageState extends State<DashboardPage> {
         InkWell(
           onTap: onTap,
           child: Container(
-            width: 140,
             height: 80,
+            width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
