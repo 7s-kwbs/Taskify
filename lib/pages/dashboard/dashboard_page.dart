@@ -5,6 +5,7 @@ import 'package:todo_app/pages/dashboard/project_item_model.dart';
 import 'package:todo_app/pages/dashboard/status_item_model.dart';
 import 'package:todo_app/pages/my_task/my_task_screen.dart';
 import 'package:todo_app/pages/projects/add_project_screen.dart';
+import 'package:todo_app/pages/projects/project_detail.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
 import '../todo_page.dart';
@@ -307,43 +308,46 @@ class ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.assignment_sharp, color: item.iconColor, size: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              item.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.blueGrey,
+    return InkWell(
+      onTap: ()=> Get.to(ProjectDetail()),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.assignment_sharp, color: item.iconColor, size: 32),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                item.title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blueGrey,
+                ),
               ),
             ),
-          ),
-          Text(
-            "${item.count}",
-            style: const TextStyle(
-              fontSize: 20,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
+            Text(
+              "${item.count}",
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
