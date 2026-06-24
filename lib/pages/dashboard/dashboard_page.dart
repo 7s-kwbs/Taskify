@@ -4,6 +4,7 @@ import 'package:todo_app/pages/dashboard/label_item_model.dart';
 import 'package:todo_app/pages/dashboard/project_item_model.dart';
 import 'package:todo_app/pages/dashboard/status_item_model.dart';
 import 'package:todo_app/pages/my_task/my_task_screen.dart';
+import 'package:todo_app/pages/projects/add_project_screen.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
 import '../todo_page.dart';
@@ -91,7 +92,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         expanded: projectExpanded,
                         onToggle: () =>
                             setState(() => projectExpanded = !projectExpanded),
-                        onAdd: () {},
+                        onAdd: ()=> Get.to(AddProjectScreen()),
                       ),
                       if (projectExpanded)
                         Column(
