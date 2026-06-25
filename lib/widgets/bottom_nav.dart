@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:todo_app/pages/my_task/my_task_screen.dart';
 
 class BottomNav extends StatelessWidget {
   const BottomNav({super.key});
@@ -15,7 +17,7 @@ class BottomNav extends StatelessWidget {
           Positioned(
             top: -40,
             child: GestureDetector(
-              onTap: (){},
+              onTap: ()=> Get.to(MytaskScreen()),
               child: Container(
                 width: 60,
                 height: 60,

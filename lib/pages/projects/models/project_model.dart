@@ -28,7 +28,7 @@ class Project {
   }) : createdAt = createdAt ?? DateTime.now(),
        taskIds = taskIds ?? [];
 
-  Project copywith({
+  Project copyWith({
     String? name,
     String? description,
     DateTime? deadline,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-import 'package:todo_app/pages/projects/project_model.dart';
+import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
 class AddProjectScreen extends StatefulWidget {

@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:todo_app/pages/dashboard/label_item_model.dart';
 import 'package:todo_app/pages/dashboard/project_item_model.dart';
 import 'package:todo_app/pages/dashboard/status_item_model.dart';
+import 'package:todo_app/pages/labels/add_label_screen.dart';
+import 'package:todo_app/pages/labels/label_detail_screen.dart';
 import 'package:todo_app/pages/my_task/my_task_screen.dart';
-import 'package:todo_app/pages/projects/add_project_screen.dart';
-import 'package:todo_app/pages/projects/project_detail.dart';
+import 'package:todo_app/pages/projects/screens/add_project_screen.dart';
+import 'package:todo_app/pages/projects/screens/project_detail.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
 import '../todo_page.dart';
@@ -114,7 +116,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         expanded: labelsExpanded,
                         onToggle: () =>
                             setState(() => labelsExpanded = !labelsExpanded),
-                        onAdd: () {},
+                        onAdd: ()=> Get.to(AddLabelScreen()),
                       ),
                       if (labelsExpanded)
                         LayoutBuilder(
@@ -261,42 +263,45 @@ class Labelchip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.local_offer_outlined, color: color, size: 28),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.blueGrey,
+    return InkWell(
+      onTap: ()=> Get.to(LabelDetail()),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.local_offer_outlined, color: color, size: 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blueGrey,
+                ),
               ),
             ),
-          ),
-          Text(
-            "$count",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
+            Text(
+              "$count",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
