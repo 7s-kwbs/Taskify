@@ -14,7 +14,7 @@ class ProjectServices {
   }
 
   CollectionReference<Map<String, dynamic>> get _collection =>
-  _db.collection("user").doc(_uid).collection("projects");
+  _db.collection("users").doc(_uid).collection("projects");
 
 //firestore  -> model
   Project _fromDoc(DocumentSnapshot<Map<String, dynamic>> doc){
