@@ -65,8 +65,6 @@ class AuthController extends GetxController{
       await _auth.signInWithEmailAndPassword(email: email.trim(), password: password.trim());
     } on FirebaseAuthException catch(e){
       errorMessage.value = _parseError(e.code);
-      print("loggin error code is ${e.code}");
-      print("logging error message ${e.message}");
     }finally{
       isLoading.value = false;
     }
