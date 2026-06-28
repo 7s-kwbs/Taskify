@@ -65,6 +65,8 @@ class AuthController extends GetxController{
       await _auth.signInWithEmailAndPassword(email: email.trim(), password: password.trim());
     } on FirebaseAuthException catch(e){
       errorMessage.value = _parseError(e.code);
+      print("loggin error code is ${e.code}");
+      print("logging error message ${e.message}");
     }finally{
       isLoading.value = false;
     }
@@ -105,6 +107,8 @@ class AuthController extends GetxController{
         return 'No account found with this email.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
+      case 'invalid-credential':     
+      return 'Invalid email or password. Please try again.';
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
       case 'network-request-failed':
