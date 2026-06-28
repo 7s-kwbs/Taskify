@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/auth/auth_controller.dart';
 import 'package:todo_app/auth/forget_page.dart';
-import 'package:todo_app/pages/dashboard/dashboard_page.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
