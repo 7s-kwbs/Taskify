@@ -12,7 +12,7 @@ class ProjectController extends GetxController {
   final RxString errorMessage = "".obs;
 
   @override
-  void OnInit() {
+  void onInit() {
     super.onInit();
     _listenToProjects();
   }
@@ -43,8 +43,6 @@ class ProjectController extends GetxController {
         deadline: deadline,
         priority: priority,
         color: color,
-        totalTasks: 0,
-        completedTasks: 0,
       );
 
       await _service.createProject(project);
