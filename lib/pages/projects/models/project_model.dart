@@ -41,6 +41,8 @@ class Project {
     Color? color,
     ProjectStatus? status,
     List<String>? taskIds,
+    int? totalTasks,
+    int? completedTasks,
   }) {
     return Project(
       id: id,
@@ -52,8 +54,8 @@ class Project {
       status: status ?? this.status,
       createdAt: createdAt,
       taskIds: taskIds ?? this.taskIds,
-      totalTasks: totalTasks,
-      completedTasks: completedTasks,
+      totalTasks: totalTasks ?? this.totalTasks,
+      completedTasks: completedTasks ?? this.completedTasks,
     );
   }
 }
