@@ -16,7 +16,7 @@ class ProjectTaskController extends GetxController{
   String? _currentProjectId;
 
   //start listening to tasks for a specific project
-  void loadTask(String projectId){
+  void loadTasks(String projectId){
     if(_currentProjectId == projectId) return;
     _currentProjectId = projectId;
     tasks.clear();
