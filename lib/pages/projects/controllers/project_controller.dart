@@ -43,6 +43,8 @@ class ProjectController extends GetxController {
         deadline: deadline,
         priority: priority,
         color: color,
+        totalTasks: 0,
+        completedTasks: 0,
       );
 
       await _service.createProject(project);
@@ -72,7 +74,7 @@ class ProjectController extends GetxController {
   }
 
   //Update status
-  Future<void> updateStatus(String projectId, ProjectStatus status) async{
+  Future<void> updateStatus(String projectId, ProjectStatus status,) async{
     try{
       errorMessage.value = "";
       await _service.updateStatus(projectId, status);
@@ -92,30 +94,30 @@ class ProjectController extends GetxController {
     }
   }
 
-  //add task to project
-  Future<bool> addTaskId(String projectId, String taskId) async {
-    try{
-      isLoading.value = true;
-      errorMessage.value = "";
-      await _service.addTaskId(projectId, taskId);
-      return true;
-    }catch(e){
-      errorMessage.value = "Failed to addTask";
-      return false;
-    }finally{
-      isLoading.value = false;
-    }
-  }
+  // //add task to project
+  // Future<bool> addTaskId(String projectId, String taskId) async {
+  //   try{
+  //     isLoading.value = true;
+  //     errorMessage.value = "";
+  //     await _service.addTaskId(projectId, taskId);
+  //     return true;
+  //   }catch(e){
+  //     errorMessage.value = "Failed to addTask";
+  //     return false;
+  //   }finally{
+  //     isLoading.value = false;
+  //   }
+  // }
 
-  //delete task
-  Future<void> removeTaskId(String projectId, String taskId) async{
-    try{
-    errorMessage.value = "";
-    await _service.deleteProject(projectId);
-    }catch(e){
-      errorMessage.value = "Failed to delete task";
-    }
-  }
+  // //delete task
+  // Future<void> removeTaskId(String projectId, String taskId) async{
+  //   try{
+  //   errorMessage.value = "";
+  //   await _service.deleteProject(projectId);
+  //   }catch(e){
+  //     errorMessage.value = "Failed to delete task";
+  //   }
+  // }
 
 
 }
