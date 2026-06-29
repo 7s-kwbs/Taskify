@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/pages/dashboard/label_item_model.dart';
-import 'package:todo_app/pages/dashboard/project_item_model.dart';
 import 'package:todo_app/pages/dashboard/status_item_model.dart';
 import 'package:todo_app/pages/labels/add_label_screen.dart';
 import 'package:todo_app/pages/labels/label_detail_screen.dart';
 import 'package:todo_app/pages/my_task/my_task_screen.dart';
+import 'package:todo_app/pages/projects/controllers/project_controller.dart';
+import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/screens/add_project_screen.dart';
 import 'package:todo_app/pages/projects/screens/project_detail.dart';
+import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
-
 import '../todo_page.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -24,19 +25,16 @@ class _DashboardPageState extends State<DashboardPage> {
   bool labelsExpanded = true;
   bool statusExpanded = true;
 
-  final List<ProjectItem> projects = const [
-    ProjectItem(
-      iconColor: Color(0xFF7C7CE0),
-      title: 'CareerFoundry Course',
-      count: 5,
-    ),
-    ProjectItem(
-      iconColor: Color(0xFFE08A3C),
-      title: "App Design Project",
-      count: 2,
-    ),
-  ];
+  late final ProjectController _projectController;
 
+  @override
+  void initState() {
+    super.initState();
+    _projectController = Get.put(ProjectController());
+    Get.put(ProjectTaskController());
+  }
+
+  // ── Hardcoded labels and statuses (until you build those features) ─
   final List<LabelItem> labels = const [
     LabelItem(color: Color(0xFF7C7CE0), title: 'Study', count: 5),
     LabelItem(color: Color(0xFF445273), title: 'Sports', count: 2),
@@ -54,120 +52,125 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 236, 234, 234),
+      backgroundColor: const Color(0xFFECEAEA),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) =>  TodoPage()),
+            MaterialPageRoute(builder: (_) => TodoPage()),
           );
         },
         child: const Icon(Icons.add),
       ),
       body: Column(
         children: [
-           DashboardHeader(title: "Dashboard", isDashboard: true, onTap: (){},),
+          DashboardHeader(
+            title: "Dashboard",
+            isDashboard: true,
+            onTap: () {},
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
+                  // ── View cards ──
                   Row(
                     children: [
-                      Expanded(child: _dashboardCard(title: "List", icon: Icons.list_outlined, onTap: ()=> Get.to(()=> MytaskScreen()))),
-                      SizedBox(width: 10,),
+                      Expanded(
+                        child: _dashboardCard(
+                          title: "List",
+                          icon: Icons.list_outlined,
+                          onTap: () => Get.to(() => MytaskScreen()),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: _dashboardCard(
                           title: "Calendar",
                           icon: Icons.calendar_month,
-                          onTap: (){},
+                          onTap: () {},
                         ),
                       ),
-                      SizedBox(width: 10,),
-                      Expanded(child: _dashboardCard(title: "Reports", icon: Icons.view_kanban, onTap: (){})),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _dashboardCard(
+                          title: "Reports",
+                          icon: Icons.view_kanban,
+                          onTap: () {},
+                        ),
+                      ),
                     ],
                   ),
+
                   const SizedBox(height: 12),
-                  Column(
-                    children: [
-                      SectionHeader(
-                        title: "Projects",
-                        expanded: projectExpanded,
-                        onToggle: () =>
-                            setState(() => projectExpanded = !projectExpanded),
-                        onAdd: ()=> Get.to(AddProjectScreen()),
-                      ),
-                      if (projectExpanded)
-                        Column(
-                          children: projects
+
+                  // ── Projects section ──
+                  SectionHeader(
+                    title: "Projects",
+                    expanded: projectExpanded,
+                    onToggle: () =>
+                        setState(() => projectExpanded = !projectExpanded),
+                    onAdd: () => Get.to(() => const AddProjectScreen()),
+                  ),
+                  if (projectExpanded) _buildProjectsList(),
+
+                  // ── Labels section ──
+                  SectionHeader(
+                    title: "Labels",
+                    expanded: labelsExpanded,
+                    onToggle: () =>
+                        setState(() => labelsExpanded = !labelsExpanded),
+                    onAdd: () => Get.to(() => AddLabelScreen()),
+                  ),
+                  if (labelsExpanded)
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final chipWidth = (constraints.maxWidth - 10) / 2;
+                        return Wrap(
+                          spacing: 10,
+                          runSpacing: 14,
+                          children: labels
                               .map(
-                                (p) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 10,
+                                (label) => SizedBox(
+                                  width: chipWidth,
+                                  child: Labelchip(
+                                    color: label.color,
+                                    title: label.title,
+                                    count: label.count,
                                   ),
-                                  child: ProjectCard(item: p),
                                 ),
                               )
                               .toList(),
-                        ),
-                      SectionHeader(
-                        title: "Labels",
-                        expanded: labelsExpanded,
-                        onToggle: () =>
-                            setState(() => labelsExpanded = !labelsExpanded),
-                        onAdd: ()=> Get.to(AddLabelScreen()),
-                      ),
-                      if (labelsExpanded)
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            // One gap (spacing: 10) sits between the two
-                            // columns, so only subtract it once.
-                            final chipWidth = (constraints.maxWidth - 10) / 2;
-                            return Wrap(
-                              spacing: 10,
-                              runSpacing: 14,
-                              children: labels
-                                  .map(
-                                    (label) => SizedBox(
-                                      width: chipWidth,
-                                      child: Labelchip(
-                                        color: label.color,
-                                        title: label.title,
-                                        count: label.count,
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            );
-                          },
-                        ),
-                      SectionHeader(
-                        title: "Status",
-                        expanded: statusExpanded,
-                        onToggle: () =>
-                            setState(() => statusExpanded = !statusExpanded),
-                        onAdd: () {},
-                      ),
-                      if (statusExpanded)
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: statuses
-                                .map(
-                                  (status) => Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: StatusChip(
-                                      color: status.color,
-                                      title: status.title,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                    ],
+                        );
+                      },
+                    ),
+
+                  // ── Status section ──
+                  SectionHeader(
+                    title: "Status",
+                    expanded: statusExpanded,
+                    onToggle: () =>
+                        setState(() => statusExpanded = !statusExpanded),
+                    onAdd: () {},
                   ),
+                  if (statusExpanded)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: statuses
+                            .map(
+                              (status) => Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: StatusChip(
+                                  color: status.color,
+                                  title: status.title,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -177,15 +180,79 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _dashboardCard({required String title, required IconData icon, required onTap}) {
+  // ── Projects list with three states ──────────────────────────────
+  Widget _buildProjectsList() {
+    return Obx(() {
+      // loading state
+      if (_projectController.isLoading.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: CircularProgressIndicator(color: Color(0xFF666AF6)),
+          ),
+        );
+      }
+
+      // empty state
+      if (_projectController.projects.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(Icons.folder_open_outlined,
+                    size: 48, color: Colors.grey.shade400),
+                const SizedBox(height: 12),
+                Text(
+                  'No projects yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tap + to create your first project',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      // has data
+      return Column(
+        children: _projectController.projects
+            .map(
+              (project) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ProjectCard(project: project),
+              ),
+            )
+            .toList(),
+      );
+    });
+  }
+
+  // ── Dashboard card ────────────────────────────────────────────────
+  Widget _dashboardCard({
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return Column(
       children: [
         Text(
           title,
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Color.fromARGB(255, 61, 41, 116),
+            color: Color(0xFF3D2974),
           ),
         ),
         const SizedBox(height: 8),
@@ -206,6 +273,104 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 }
 
+// ── ProjectCard ────────────────────────────────────────────────────
+class ProjectCard extends StatelessWidget {
+  final Project project;
+  const ProjectCard({super.key, required this.project});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress =
+        '${project.completedTasks}/${project.totalTasks}';
+    final bool allDone =
+        project.totalTasks > 0 &&
+        project.completedTasks == project.totalTasks;
+
+    return InkWell(
+      onTap: () => Get.to(() => ProjectDetail(project: project)),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // ── Color tag indicator ──
+            Container(
+              width: 4,
+              height: 40,
+              decoration: BoxDecoration(
+                color: project.color,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // ── Icon ──
+            Icon(Icons.assignment_sharp, color: project.color, size: 28),
+            const SizedBox(width: 12),
+
+            // ── Name + progress bar ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    project.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                  if (project.totalTasks > 0) ...[
+                    const SizedBox(height: 6),
+                    LinearProgressIndicator(
+                      value: project.totalTasks == 0
+                          ? 0
+                          : project.completedTasks / project.totalTasks,
+                      backgroundColor: Colors.grey.shade200,
+                      color: allDone
+                          ? const Color(0xFF4CAF82)
+                          : project.color,
+                      borderRadius: BorderRadius.circular(4),
+                      minHeight: 4,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // ── Progress label ──
+            Text(
+              progress,
+              style: TextStyle(
+                fontSize: 14,
+                color: allDone
+                    ? const Color(0xFF4CAF82)
+                    : Colors.grey.shade500,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── StatusChip ─────────────────────────────────────────────────────
 class StatusChip extends StatelessWidget {
   final Color color;
   final String title;
@@ -230,15 +395,15 @@ class StatusChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 14,
-            height: 14,
+            width: 12,
+            height: 12,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
           Text(
             title,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
               color: Colors.blueGrey,
             ),
@@ -249,6 +414,7 @@ class StatusChip extends StatelessWidget {
   }
 }
 
+// ── Labelchip ──────────────────────────────────────────────────────
 class Labelchip extends StatelessWidget {
   final String title;
   final Color color;
@@ -264,9 +430,11 @@ class Labelchip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: ()=> Get.to(LabelDetail()),
+      onTap: () => Get.to(() => LabelDetail()),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -280,22 +448,22 @@ class Labelchip extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.local_offer_outlined, color: color, size: 28),
+            Icon(Icons.local_offer_outlined, color: color, size: 24),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.blueGrey,
                 ),
               ),
             ),
             Text(
-              "$count",
+              '$count',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 15,
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w500,
               ),
@@ -307,57 +475,7 @@ class Labelchip extends StatelessWidget {
   }
 }
 
-class ProjectCard extends StatelessWidget {
-  final ProjectItem item;
-  const ProjectCard({super.key, required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: ()=> Get.to(ProjectDetail()),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.assignment_sharp, color: item.iconColor, size: 32),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                item.title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.blueGrey,
-                ),
-              ),
-            ),
-            Text(
-              "${item.count}",
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+// ── SectionHeader ──────────────────────────────────────────────────
 class SectionHeader extends StatelessWidget {
   final String title;
   final bool expanded;
@@ -380,8 +498,8 @@ class SectionHeader extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
             color: Colors.blueGrey,
           ),
         ),
@@ -395,13 +513,13 @@ class SectionHeader extends StatelessWidget {
                 child: Icon(
                   Icons.keyboard_arrow_down,
                   color: Colors.grey.shade500,
-                  size: 42,
+                  size: 32,
                 ),
               ),
             ),
             IconButton(
               onPressed: onAdd,
-              icon: Icon(Icons.add, color: Colors.grey.shade500, size: 32),
+              icon: Icon(Icons.add, color: Colors.grey.shade500, size: 26),
             ),
           ],
         ),
