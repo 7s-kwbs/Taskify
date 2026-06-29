@@ -33,7 +33,7 @@ class ProjectTaskController extends GetxController{
       required String title,
       required String description,
       required ProjectTaskPriority priority,
-      required ProjectTaskStatus status,
+      // required ProjectTaskStatus status,
       List<String>? labels,
       DateTime? dueDate,
   }) async{
@@ -45,7 +45,7 @@ class ProjectTaskController extends GetxController{
         id: const Uuid().v4(), 
         title: title, 
         description: description, 
-        status: status, 
+        status: ProjectTaskStatus.todo, 
         priority: priority, 
         projectId: projectId,
         dueDate:  dueDate,
@@ -80,11 +80,12 @@ class ProjectTaskController extends GetxController{
   Future<void> updateStatus(
     String projectId, 
     String taskId,
-    ProjectTaskStatus status,
+    ProjectTaskStatus oldstatus,
+    ProjectTaskStatus newStatus,
   )async{
     try{
       errorMessage.value = '';
-      await _services.updateStatus(projectId, taskId, status);
+      await _services.updateStatus(projectId, taskId, oldstatus, newStatus);
     }catch (e){
       errorMessage.value = "Failed to update task Status";
     }
