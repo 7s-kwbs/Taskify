@@ -35,8 +35,8 @@ class ProjectServices {
       ),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       taskIds: List<String>.from(map['taskIds']?? []),
-      totalTasks: map['totalTasks'],
-      completedTasks: map['completedTasks'],
+      totalTasks: map['totalTasks'] as int? ?? 0,
+      completedTasks: map['completedTasks'] as int? ?? 0,
     );
   }
 
@@ -58,6 +58,17 @@ class ProjectServices {
     };
   }
 
+  Map<String,dynamic> _toUpdateMap(Project project){
+    return{
+      'name': project.name,
+      'description': project.description,
+      'deadline': Timestamp.fromDate(project.deadline),
+      'priority': project.priority.name,
+      'color': project.color.value,
+      'status': project.status.name,
+    };
+  }
+
   //real time stream
   Stream<List<Project>> watchProjects(){
     return _collection
@@ -73,7 +84,7 @@ class ProjectServices {
 
   //update
   Future<void> updateProject(Project project) async{
-    await _collection.doc(project.id).update(_toMap(project));
+    await _collection.doc(project.id).update(_toUpdateMap(project));
   }
 
   //update status only
