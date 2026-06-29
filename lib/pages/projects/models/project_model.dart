@@ -14,6 +14,8 @@ class Project {
   final ProjectStatus status;
   final DateTime createdAt;
   final List<String> taskIds;
+  final int totalTasks;
+  final int completedTasks;
 
   Project({
     required this.id,
@@ -22,9 +24,12 @@ class Project {
     required this.deadline,
     required this.priority,
     required this.color,
+    this.totalTasks = 0,
+    this.completedTasks = 0,
     this.status = ProjectStatus.todo,
     DateTime? createdAt,
     List<String>? taskIds,
+    
   }) : createdAt = createdAt ?? DateTime.now(),
        taskIds = taskIds ?? [];
 
@@ -47,6 +52,8 @@ class Project {
       status: status ?? this.status,
       createdAt: createdAt,
       taskIds: taskIds ?? this.taskIds,
+      totalTasks: totalTasks,
+      completedTasks: completedTasks,
     );
   }
 }
