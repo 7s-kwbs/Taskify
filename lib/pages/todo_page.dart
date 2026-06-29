@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_app/auth/auth_controller.dart';
 import 'package:todo_app/auth/login_page.dart';
 import 'completed_page/completed_page.dart';
 import '../models/todo_model.dart';
@@ -119,13 +120,7 @@ class _TodoPageState extends State<TodoPage> {
         backgroundColor: const Color.fromARGB(255, 66, 168, 252),
         actions: [
           IconButton(
-            onPressed: () async{
-              final prefs =await SharedPreferences.getInstance();
-              await prefs.setBool("isLoggedIn", false);
-              Navigator.pushAndRemoveUntil(context,
-              MaterialPageRoute(builder: (_) => LoginPage()),
-              (route)=>false);
-            },
+            onPressed: ()=> AuthController().logout(),
             icon: Icon(Icons.logout, color: Colors.white),
           ),
         ],
