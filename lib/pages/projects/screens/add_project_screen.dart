@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
+import 'package:todo_app/pages/projects/controllers/project_controller.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 
@@ -15,6 +15,8 @@ class AddProjectScreen extends StatefulWidget {
 class _AddProjectScreenState extends State<AddProjectScreen> {
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+
+  final ProjectController _projectController = Get.find<ProjectController>();
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   final _deadlinecontroller = TextEditingController();
@@ -71,26 +73,64 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   }
 
   //submit
-  void _submit() {
-    setState(() {
-      _autovalidateMode = AutovalidateMode.onUserInteraction;
-    });
+  Future<void> _submit() async {
+    setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
     if (!_formKey.currentState!.validate()) return;
-    final project = Project(
-      id: const Uuid().v4(),
+
+    final success = await _projectController.createProject(
       name: _nameController.text.trim(),
       description: _descController.text.trim(),
       deadline: _deadLine!,
       priority: _priority,
       color: _selectedColor,
     );
-    print(project.id);
-    print(project.name);
-    print(project.description);
-    print(project.deadline);
-    print(project.priority);
-    print(project.color);
-    print(project.createdAt);
+
+    if (success) {
+      Get.back();
+      Get.snackbar(
+        'Project Created',
+        '${_nameController.text.trim()} has been added.',
+        backgroundColor: const Color(0xFF4CAF82),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } else {
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.error_outline, color: Color(0xFFFF6B6B)),
+              SizedBox(width: 8),
+              Text(
+                'Failed',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          content: Text(
+            _projectController.errorMessage.value,
+            style: const TextStyle(fontSize: 15, color: Colors.blueGrey),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF666AF6),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text('Try Again'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -154,23 +194,37 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
         ],
       ),
       //create button
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: _submit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF666AF6),
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shadowColor: const Color(0xFF666AF6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+      floatingActionButton: Obx(
+        () => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _projectController.isLoading.value ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF666AF6),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(
+                  0xFF666AF6,
+                ).withOpacity(0.6),
+                elevation: 4,
+                shadowColor: const Color(0xFF666AF6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
+              child: _projectController.isLoading.value
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Text('Create Project'),
             ),
-            child: const Text("Create Project"),
           ),
         ),
       ),
