@@ -35,6 +35,8 @@ class ProjectServices {
       ),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       taskIds: List<String>.from(map['taskIds']?? []),
+      totalTasks: map['totalTasks'],
+      completedTasks: map['completedTasks'],
     );
   }
 
@@ -51,6 +53,8 @@ class ProjectServices {
       'status': project.status.name,
       'createdAt': Timestamp.fromDate(project.createdAt),
       'taskIds': project.taskIds,
+      'totalTasks': project.totalTasks,
+      "completedTasks":project.completedTasks,
     };
   }
 
@@ -77,19 +81,6 @@ class ProjectServices {
     await _collection.doc(projectId).update({'status': status.name});
   }
 
-  //Add task Id to project
-  Future<void> addTaskId(String projectId, String taskId) async {
-    await _collection.doc(projectId).update({
-      'taskIds': FieldValue.arrayUnion([taskId]),
-    });
-  }
-
-  //Remove taskId from project 
-   Future<void> removeTaskId(String projectId, String taskId) async {
-    await _collection.doc(projectId).update({
-      'taskIds': FieldValue.arrayRemove([taskId]),
-    });
-  }
 
   //Delete
    Future<void> deleteProject(String projectId) async {
