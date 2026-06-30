@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/pages/projects/controllers/project_controller.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/screens/add_task_screen.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
@@ -17,11 +18,13 @@ class ProjectDetail extends StatefulWidget {
 }
 
 class _ProjectDetailState extends State<ProjectDetail> {
+  late final ProjectController _projectController;
   late final ProjectTaskController _taskController;
 
   @override
   void initState() {
     super.initState();
+    _projectController = Get.find<ProjectController>();
     _taskController = Get.find<ProjectTaskController>();
     _taskController.loadTasks(widget.project.id);
   }
@@ -67,7 +70,13 @@ class _ProjectDetailState extends State<ProjectDetail> {
                   const SizedBox(height: 20),
 
                   // ── Progress ──
-                  _buildProgressSection(project),
+                  Obx(() {
+                    final fresh = _projectController.projects.firstWhere(
+                      (p) => p.id == widget.project.id,
+                      orElse: () => widget.project,
+                    );
+                    return _buildProgressSection(fresh);
+                  }),
 
                   const SizedBox(height: 24),
 

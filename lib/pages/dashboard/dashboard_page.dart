@@ -64,11 +64,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-          DashboardHeader(
-            title: "Dashboard",
-            isDashboard: true,
-            onTap: () {},
-          ),
+          DashboardHeader(title: "Dashboard", isDashboard: true, onTap: () {}),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -200,8 +196,11 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Center(
             child: Column(
               children: [
-                Icon(Icons.folder_open_outlined,
-                    size: 48, color: Colors.grey.shade400),
+                Icon(
+                  Icons.folder_open_outlined,
+                  size: 48,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'No projects yet',
@@ -214,10 +213,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 const SizedBox(height: 4),
                 Text(
                   'Tap + to create your first project',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade400,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
                 ),
               ],
             ),
@@ -280,93 +276,100 @@ class ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress =
-        '${project.completedTasks}/${project.totalTasks}';
-    final bool allDone =
-        project.totalTasks > 0 &&
-        project.completedTasks == project.totalTasks;
+    final projectController = Get.find<ProjectController>();
 
-    return InkWell(
-      onTap: () => Get.to(() => ProjectDetail(project: project)),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // ── Color tag indicator ──
-            Container(
-              width: 4,
-              height: 40,
-              decoration: BoxDecoration(
-                color: project.color,
-                borderRadius: BorderRadius.circular(4),
+    return Obx(() {
+      final fresh = projectController.projects.firstWhere(
+        (p)=> p.id == project.id,
+        orElse: ()=> project
+      );
+      final progress = '${fresh.completedTasks}/${fresh.totalTasks}';
+      final bool allDone =
+          project.totalTasks > 0 &&
+          project.completedTasks == project.totalTasks;
+
+      return InkWell(
+        onTap: () => Get.to(() => ProjectDetail(project: project)),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
-            ),
-            const SizedBox(width: 12),
+            ],
+          ),
+          child: Row(
+            children: [
+              // ── Color tag indicator ──
+              Container(
+                width: 4,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: project.color,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 12),
 
-            // ── Icon ──
-            Icon(Icons.assignment_sharp, color: project.color, size: 28),
-            const SizedBox(width: 12),
+              // ── Icon ──
+              Icon(Icons.assignment_sharp, color: project.color, size: 28),
+              const SizedBox(width: 12),
 
-            // ── Name + progress bar ──
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    project.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blueGrey,
+              // ── Name + progress bar ──
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      project.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blueGrey,
+                      ),
                     ),
-                  ),
-                  if (project.totalTasks > 0) ...[
-                    const SizedBox(height: 6),
-                    LinearProgressIndicator(
-                      value: project.totalTasks == 0
-                          ? 0
-                          : project.completedTasks / project.totalTasks,
-                      backgroundColor: Colors.grey.shade200,
-                      color: allDone
-                          ? const Color(0xFF4CAF82)
-                          : project.color,
-                      borderRadius: BorderRadius.circular(4),
-                      minHeight: 4,
-                    ),
+                    if (project.totalTasks > 0) ...[
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(
+                        value: project.totalTasks == 0
+                            ? 0
+                            : project.completedTasks / project.totalTasks,
+                        backgroundColor: Colors.grey.shade200,
+                        color: allDone
+                            ? const Color(0xFF4CAF82)
+                            : project.color,
+                        borderRadius: BorderRadius.circular(4),
+                        minHeight: 4,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
 
-            // ── Progress label ──
-            Text(
-              progress,
-              style: TextStyle(
-                fontSize: 14,
-                color: allDone
-                    ? const Color(0xFF4CAF82)
-                    : Colors.grey.shade500,
-                fontWeight: FontWeight.w600,
+              // ── Progress label ──
+              Text(
+                progress,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: allDone
+                      ? const Color(0xFF4CAF82)
+                      : Colors.grey.shade500,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -433,8 +436,7 @@ class Labelchip extends StatelessWidget {
       onTap: () => Get.to(() => LabelDetail()),
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),

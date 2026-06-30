@@ -104,7 +104,7 @@ class ProjectTaskService {
             .doc(_uid)
             .collection("projects")
             .doc(projectId)
-            .update({"status": FieldValue.increment(-1)});
+            .update({"completedTasks": FieldValue.increment(-1)});
     }
   }
 
