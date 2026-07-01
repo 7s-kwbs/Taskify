@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:todo_app/pages/my_task/task_model.dart';
 import 'package:todo_app/pages/my_task/task_sample_data.dart';
 import 'package:todo_app/widgets/bottom_nav.dart';
-import 'package:todo_app/widgets/dashboard_header.dart';
 import 'package:todo_app/widgets/page_header.dart';
 
 class MytaskScreen extends StatelessWidget {

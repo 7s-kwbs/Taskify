@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 import 'package:todo_app/pages/projects/tasks/model/project_task_model.dart';
-import 'package:todo_app/widgets/dashboard_header.dart';
 import 'package:todo_app/widgets/page_header.dart';
 
 class AddTaskScreen extends StatefulWidget {

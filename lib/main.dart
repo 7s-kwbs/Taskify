@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:todo_app/auth/auth_controller.dart';
 import 'package:todo_app/auth/login_page.dart';
 import 'package:todo_app/firebase_options.dart';
-import 'package:todo_app/pages/dashboard/dashboard_page.dart';
+import 'package:todo_app/pages/dashboard/dashboard_screen.dart';
 // import 'package:todo_app/pages/home/todo_page.dart';
 
 void main() async {
