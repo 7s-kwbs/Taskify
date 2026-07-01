@@ -5,6 +5,7 @@ import 'package:todo_app/pages/my_task/task_model.dart';
 import 'package:todo_app/pages/my_task/task_sample_data.dart';
 import 'package:todo_app/widgets/bottom_nav.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
+import 'package:todo_app/widgets/page_header.dart';
 
 class MytaskScreen extends StatelessWidget {
   const MytaskScreen({super.key});
@@ -15,7 +16,7 @@ class MytaskScreen extends StatelessWidget {
       backgroundColor: const Color.fromARGB(255, 236, 234, 234),
       body: Column(
         children: [
-          DashboardHeader(title: "My tasks", isDashboard: false, onTap: (){Get.back();},),
+          PageHeader(title: "My Tasks", onBack: ()=> Get.back()),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(

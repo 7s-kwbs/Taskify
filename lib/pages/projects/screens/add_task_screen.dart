@@ -5,6 +5,7 @@ import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 import 'package:todo_app/pages/projects/tasks/model/project_task_model.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
+import 'package:todo_app/widgets/page_header.dart';
 
 class AddTaskScreen extends StatefulWidget {
   final Project project;
@@ -104,22 +105,23 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         '${_titleController.text.trim()} has been added.',
         backgroundColor: const Color(0xFF4CAF82),
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         margin: const EdgeInsets.all(16),
       );
+      
     } else {
       Get.dialog(
         AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Row(
             children: [
               Icon(Icons.error_outline, color: Color(0xFFFF6B6B)),
               SizedBox(width: 8),
               Text(
                 'Failed',
-                style:
-                    TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -134,7 +136,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 backgroundColor: const Color(0xFF666AF6),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: const Text('Try Again'),
             ),
@@ -148,162 +151,209 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FA),
-      body: Column(
-        children: [
-          DashboardHeader(
-            title: 'Add Task',
-            isDashboard: false,
-            onTap: () => Get.back(),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: _autovalidateMode,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Project indicator ──
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: widget.project.color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+      body: Obx(
+        () => Stack(
+          children: [
+            Column(
+              children: [
+                PageHeader(title: "Add Task", onBack: () => Get.back()),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: _autovalidateMode,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // ── Project indicator ──
                           Container(
-                            width: 10,
-                            height: 10,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
-                              color: widget.project.color,
-                              shape: BoxShape.circle,
+                              color: widget.project.color.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: widget.project.color,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.project.name,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: widget.project.color,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            widget.project.name,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: widget.project.color,
+
+                          const SizedBox(height: 20),
+
+                          // ── Title ──
+                          _buildLabel('Task Title'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _titleController,
+                            textCapitalization: TextCapitalization.sentences,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: _inputDecoration('Enter task title'),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty)
+                                return 'Task title is required.';
+                              if (v.trim().length < 3)
+                                return 'Title must be at least 3 characters.';
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // ── Description ──
+                          _buildLabel('Description'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _descController,
+                            maxLines: 3,
+                            textCapitalization: TextCapitalization.sentences,
+                            style: const TextStyle(fontSize: 15),
+                            decoration: _inputDecoration(
+                              'Enter task description (optional)',
                             ),
                           ),
+
+                          const SizedBox(height: 20),
+
+                          // ── Due date ──
+                          _buildLabel('Due Date (optional)'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _dueDateController,
+                            readOnly: true,
+                            onTap: _pickDueDate,
+                            style: const TextStyle(fontSize: 15),
+                            decoration: _inputDecoration('Select due date')
+                                .copyWith(
+                                  suffixIcon: _dueDate != null
+                                      ? IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Color(0xFF9E9E9E),
+                                            size: 18,
+                                          ),
+                                          onPressed: () => setState(() {
+                                            _dueDate = null;
+                                            _dueDateController.clear();
+                                          }),
+                                        )
+                                      : const Icon(
+                                          Icons.calendar_today,
+                                          color: Color(0xFF9E9E9E),
+                                          size: 18,
+                                        ),
+                                ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // ── Priority ──
+                          _buildLabel('Priority'),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<ProjectTaskPriority>(
+                            value: _priority,
+                            decoration: _inputDecoration(''),
+                            items: ProjectTaskPriority.values.map((priority) {
+                              return DropdownMenuItem<ProjectTaskPriority>(
+                                value: priority,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: _priorityColor[priority],
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _priorityLabel[priority]!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null)
+                                setState(() => _priority = value);
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // ── Labels ──
+                          _buildLabel('Labels'),
+                          const SizedBox(height: 12),
+                          _buildLabelPicker(),
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Title ──
-                    _buildLabel('Task Title'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _titleController,
-                      textCapitalization: TextCapitalization.sentences,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w500),
-                      decoration: _inputDecoration('Enter task title'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty)
-                          return 'Task title is required.';
-                        if (v.trim().length < 3)
-                          return 'Title must be at least 3 characters.';
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Description ──
-                    _buildLabel('Description'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _descController,
-                      maxLines: 3,
-                      textCapitalization: TextCapitalization.sentences,
-                      style: const TextStyle(fontSize: 15),
-                      decoration:
-                          _inputDecoration('Enter task description (optional)'),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Due date ──
-                    _buildLabel('Due Date (optional)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _dueDateController,
-                      readOnly: true,
-                      onTap: _pickDueDate,
-                      style: const TextStyle(fontSize: 15),
-                      decoration: _inputDecoration('Select due date').copyWith(
-                        suffixIcon: _dueDate != null
-                            ? IconButton(
-                                icon: const Icon(Icons.close,
-                                    color: Color(0xFF9E9E9E), size: 18),
-                                onPressed: () => setState(() {
-                                  _dueDate = null;
-                                  _dueDateController.clear();
-                                }),
-                              )
-                            : const Icon(Icons.calendar_today,
-                                color: Color(0xFF9E9E9E), size: 18),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Priority ──
-                    _buildLabel('Priority'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<ProjectTaskPriority>(
-                      value: _priority,
-                      decoration: _inputDecoration(''),
-                      items: ProjectTaskPriority.values.map((priority) {
-                        return DropdownMenuItem<ProjectTaskPriority>(
-                          value: priority,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  color: _priorityColor[priority],
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _priorityLabel[priority]!,
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) setState(() => _priority = value);
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Labels ──
-                    _buildLabel('Labels'),
-                    const SizedBox(height: 12),
-                    _buildLabelPicker(),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
+            if(_taskController.isLoading.value)
+              Container(
+                color: Colors.black.withOpacity(0.4),
+                child: const Center(
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                    ),
+                    child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(
+                               color: Color(0xFF666AF6),
+                            ),
+                            SizedBox( height: 16,),
+                            Text(
+                              "Adding task...",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blueGrey,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                  ),
+                ),
+              )
+          ],
+        ),
       ),
 
       // ── Add task button ──
@@ -318,8 +368,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF666AF6),
                 foregroundColor: Colors.white,
-                disabledBackgroundColor:
-                    const Color(0xFF666AF6).withOpacity(0.6),
+                disabledBackgroundColor: const Color(
+                  0xFF666AF6,
+                ).withOpacity(0.6),
                 elevation: 4,
                 shadowColor: const Color(0xFF666AF6).withOpacity(0.4),
                 shape: RoundedRectangleBorder(
@@ -338,7 +389,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   : const Text(
                       'Add Task',
                       style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
             ),
           ),
@@ -370,8 +423,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: isSelected ? color : Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -384,7 +436,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         color: color.withOpacity(0.3),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
-                      )
+                      ),
                     ]
                   : [],
             ),
@@ -437,8 +489,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       hintStyle: const TextStyle(color: Color(0xFFBDBDBD), fontSize: 14),
       filled: true,
       fillColor: Colors.white,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -449,8 +500,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide:
-            const BorderSide(color: Color(0xFF666AF6), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF666AF6), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -458,8 +508,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide:
-            const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
       ),
     );
   }

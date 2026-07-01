@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:todo_app/pages/projects/controllers/project_controller.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
+import 'package:todo_app/widgets/page_header.dart';
 
 class AddProjectScreen extends StatefulWidget {
   const AddProjectScreen({super.key});
@@ -139,11 +140,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
       body: Column(
         children: [
           //header
-          DashboardHeader(
-            title: "Add New Project",
-            isDashboard: false,
-            onTap: () => Get.back(),
-          ),
+          PageHeader(title: "New Project", onBack: ()=>Get.back()),
 
           //form
           Expanded(

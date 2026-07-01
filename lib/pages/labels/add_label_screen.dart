@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/widgets/dashboard_header.dart' show DashboardHeader;
+import 'package:todo_app/widgets/page_header.dart';
 
 class AddLabelScreen extends StatelessWidget{
   const AddLabelScreen({ super.key});
@@ -8,7 +8,7 @@ class AddLabelScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      body: DashboardHeader(title: "Add Label", isDashboard: false, onTap: ()=> Get.back()),
+      body: PageHeader(title: "Add Label", onBack: ()=>Get.back())
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:todo_app/pages/projects/screens/add_task_screen.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 import 'package:todo_app/pages/projects/tasks/model/project_task_model.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
+import 'package:todo_app/widgets/page_header.dart';
 
 class ProjectDetail extends StatefulWidget {
   final Project project;
@@ -51,11 +52,7 @@ class _ProjectDetailState extends State<ProjectDetail> {
       body: Column(
         children: [
           // ── Header ──
-          DashboardHeader(
-            title: project.name,
-            isDashboard: false,
-            onTap: () => Get.back(),
-          ),
+          PageHeader(title: project.name, onBack: ()=> Get.back()),
 
           // ── Scrollable body ──
           Expanded(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/widgets/dashboard_header.dart' show DashboardHeader;
+import 'package:todo_app/widgets/page_header.dart';
 
 class LabelDetail extends StatelessWidget{
   const LabelDetail({ super.key});
@@ -8,7 +8,7 @@ class LabelDetail extends StatelessWidget{
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      body: DashboardHeader(title: "Label Details", isDashboard: false, onTap: ()=> Get.back()),
+      body: PageHeader(title: "Label Detail", onBack: ()=> Get.back())
     );
   }
 }
