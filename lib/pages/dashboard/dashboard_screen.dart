@@ -64,7 +64,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-          DashboardHeader(title: "Dashboard", isDashboard: true, onTap: () {}),
+          DashboardHeader(onSettingsTap: (){}),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
