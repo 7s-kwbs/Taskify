@@ -114,6 +114,7 @@ class AuthController extends GetxController {
 
       final user = _auth.currentUser;
       if (user == null || user.email == null) return false;
+      print("user email is ${user.email}");
 
       //creating AuthCredential
       final credential = EmailAuthProvider.credential(
@@ -127,9 +128,10 @@ class AuthController extends GetxController {
       await user.updatePassword(newPassword);
       return true;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'wrong-password') {
+      if (e.code == 'invalid-credential') {
         errorMessage.value = 'incorrect password. Please try again. ';
       } else {
+        print(e.code);
         errorMessage.value = _parseError(e.code);
       }
       return false;

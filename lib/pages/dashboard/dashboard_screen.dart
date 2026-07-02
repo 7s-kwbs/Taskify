@@ -10,6 +10,7 @@ import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/screens/add_project_screen.dart';
 import 'package:todo_app/pages/projects/screens/project_detail.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
+import 'package:todo_app/pages/settings/settings_screen.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
 import '../todo_page.dart';
 
@@ -64,7 +65,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-          DashboardHeader(onSettingsTap: (){}),
+          DashboardHeader(onSettingsTap: ()=> Get.to(SettingsScreen())),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
