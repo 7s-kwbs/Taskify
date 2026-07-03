@@ -84,17 +84,17 @@ class ProjectServices {
 
   //update
   Future<void> updateProject(Project project) async{
-    await _collection.doc(project.id).update(_toUpdateMap(project));
+     _collection.doc(project.id).update(_toUpdateMap(project));
   }
 
   //update status only
   Future<void> updateStatus(String projectId, ProjectStatus status) async {
-    await _collection.doc(projectId).update({'status': status.name});
+     _collection.doc(projectId).update({'status': status.name});
   }
 
 
   //Delete
    Future<void> deleteProject(String projectId) async {
-    await _collection.doc(projectId).delete();
+     _collection.doc(projectId).delete();
   }
 }

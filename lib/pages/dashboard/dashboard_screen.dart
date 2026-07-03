@@ -181,14 +181,14 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildProjectsList() {
     return Obx(() {
       // loading state
-      if (_projectController.isLoading.value) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
-          child: Center(
-            child: CircularProgressIndicator(color: Color(0xFF666AF6)),
-          ),
-        );
-      }
+      // if (_projectController.isLoading.value) {
+      //   return const Padding(
+      //     padding: EdgeInsets.symmetric(vertical: 24),
+      //     child: Center(
+      //       child: CircularProgressIndicator(color: Color(0xFF666AF6)),
+      //     ),
+      //   );
+      // }
 
       // empty state
       if (_projectController.projects.isEmpty) {
