@@ -51,7 +51,7 @@ class _ProjectDetailState extends State<ProjectDetail> {
       body: Column(
         children: [
           // ── Header ──
-          PageHeader(title: project.name, onBack: ()=> Get.back()),
+          PageHeader(title: project.name,subtitle: "Project Details", onBack: ()=> Get.back()),
 
           // ── Scrollable body ──
           Expanded(

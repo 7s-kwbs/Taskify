@@ -77,60 +77,22 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
     setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await _projectController.createProject(
+    _projectController.createProject(
       name: _nameController.text.trim(),
       description: _descController.text.trim(),
       deadline: _deadLine!,
       priority: _priority,
       color: _selectedColor,
     );
-
-    if (success) {
-      Get.back();
-      Get.snackbar(
-        'Project Created',
-        '${_nameController.text.trim()} has been added.',
-        backgroundColor: const Color(0xFF4CAF82),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+    Get.back();
+    Get.snackbar(
+      "Project Created", 
+      "${_nameController.text.trim()} has been added",
+      backgroundColor: const Color(0xFF4CAF82),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      margin: const EdgeInsets.all(16),
       );
-    } else {
-      Get.dialog(
-        AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.error_outline, color: Color(0xFFFF6B6B)),
-              SizedBox(width: 8),
-              Text(
-                'Failed',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          content: Text(
-            _projectController.errorMessage.value,
-            style: const TextStyle(fontSize: 15, color: Colors.blueGrey),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Get.back(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF666AF6),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text('Try Again'),
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   @override

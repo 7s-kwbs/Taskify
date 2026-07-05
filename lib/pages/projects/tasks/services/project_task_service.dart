@@ -71,8 +71,8 @@ class ProjectTaskService {
 
   //create 
   Future<void> createTask(ProjectTask task) async{
-    await _taskCollection(task.projectId).doc(task.id).set(_toMap(task));
-    await _db 
+     _taskCollection(task.projectId).doc(task.id).set(_toMap(task));
+     _db 
             .collection('users')
             .doc(_uid)
             .collection('projects')
@@ -82,24 +82,24 @@ class ProjectTaskService {
 
   //update
   Future<void> updateTask(ProjectTask task) async{
-    await _taskCollection(task.projectId).doc(task.id).update(_toMap(task));
+    _taskCollection(task.projectId).doc(task.id).update(_toMap(task));
   }
 
   //update status
   Future<void> updateStatus( String projectId, String taskId, ProjectTaskStatus oldstatus, ProjectTaskStatus newStatus) async{
     if(oldstatus == newStatus) return;
-    await _taskCollection(projectId)
+     _taskCollection(projectId)
             .doc(taskId)
             .update({'status' : newStatus.name});
     if(newStatus == ProjectTaskStatus.done){
-      await _db
+       _db
             .collection("users")
             .doc(_uid)
             .collection("projects")
             .doc(projectId)
             .update({"completedTasks": FieldValue.increment(1)});
     }else if(oldstatus == ProjectTaskStatus.done){
-      await _db
+       _db
             .collection("users")
             .doc(_uid)
             .collection("projects")
@@ -113,7 +113,7 @@ class ProjectTaskService {
     final doc = await _taskCollection(projectId).doc(taskId).get();
     final task = _fromDoc(doc);
 
-    await _taskCollection(projectId).doc(taskId).delete();
+     _taskCollection(projectId).doc(taskId).delete();
 
     final Map<String, dynamic> updates ={
       'totalTasks': FieldValue.increment(-1),
@@ -123,7 +123,7 @@ class ProjectTaskService {
       updates["completedTasks"] = FieldValue.increment(-1);
     }
 
-    await _db
+     _db
           .collection('users')
           .doc(_uid)
           .collection('projects')

@@ -37,6 +37,7 @@ class ProjectServices {
       taskIds: List<String>.from(map['taskIds']?? []),
       totalTasks: map['totalTasks'] as int? ?? 0,
       completedTasks: map['completedTasks'] as int? ?? 0,
+      hasPendingWrites: doc.metadata.hasPendingWrites,
     );
   }
 
@@ -73,7 +74,7 @@ class ProjectServices {
   Stream<List<Project>> watchProjects(){
     return _collection
       .orderBy("createdAt", descending: true)
-      .snapshots()
+      .snapshots(includeMetadataChanges: true)
       .map((snapshot) => snapshot.docs.map(_fromDoc).toList());
   }
 
@@ -84,17 +85,17 @@ class ProjectServices {
 
   //update
   Future<void> updateProject(Project project) async{
-    await _collection.doc(project.id).update(_toUpdateMap(project));
+     _collection.doc(project.id).update(_toUpdateMap(project));
   }
 
   //update status only
   Future<void> updateStatus(String projectId, ProjectStatus status) async {
-    await _collection.doc(projectId).update({'status': status.name});
+     _collection.doc(projectId).update({'status': status.name});
   }
 
 
   //Delete
    Future<void> deleteProject(String projectId) async {
-    await _collection.doc(projectId).delete();
+     _collection.doc(projectId).delete();
   }
 }

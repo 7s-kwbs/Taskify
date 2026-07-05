@@ -181,14 +181,14 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildProjectsList() {
     return Obx(() {
       // loading state
-      if (_projectController.isLoading.value) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
-          child: Center(
-            child: CircularProgressIndicator(color: Color(0xFF666AF6)),
-          ),
-        );
-      }
+      // if (_projectController.isLoading.value) {
+      //   return const Padding(
+      //     padding: EdgeInsets.symmetric(vertical: 24),
+      //     child: Center(
+      //       child: CircularProgressIndicator(color: Color(0xFF666AF6)),
+      //     ),
+      //   );
+      // }
 
       // empty state
       if (_projectController.projects.isEmpty) {
@@ -286,11 +286,11 @@ class ProjectCard extends StatelessWidget {
       );
       final progress = '${fresh.completedTasks}/${fresh.totalTasks}';
       final bool allDone =
-          project.totalTasks > 0 &&
-          project.completedTasks == project.totalTasks;
+          fresh.totalTasks > 0 &&
+          fresh.completedTasks == project.totalTasks;
 
       return InkWell(
-        onTap: () => Get.to(() => ProjectDetail(project: project)),
+        onTap: () => Get.to(() => ProjectDetail(project: fresh)),
         borderRadius: BorderRadius.circular(14),
         child: Container(
           width: double.infinity,
@@ -313,7 +313,7 @@ class ProjectCard extends StatelessWidget {
                 width: 4,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: project.color,
+                  color: fresh.color,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -329,23 +329,21 @@ class ProjectCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      project.name,
+                      fresh.name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.blueGrey,
                       ),
                     ),
-                    if (project.totalTasks > 0) ...[
+                    if (fresh.totalTasks > 0) ...[
                       const SizedBox(height: 6),
                       LinearProgressIndicator(
-                        value: project.totalTasks == 0
-                            ? 0
-                            : project.completedTasks / project.totalTasks,
+                        value: fresh.completedTasks / fresh.totalTasks,
                         backgroundColor: Colors.grey.shade200,
                         color: allDone
                             ? const Color(0xFF4CAF82)
-                            : project.color,
+                            : fresh.color,
                         borderRadius: BorderRadius.circular(4),
                         minHeight: 4,
                       ),
@@ -356,15 +354,23 @@ class ProjectCard extends StatelessWidget {
               const SizedBox(width: 12),
 
               // ── Progress label ──
-              Text(
-                progress,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: allDone
-                      ? const Color(0xFF4CAF82)
-                      : Colors.grey.shade500,
-                  fontWeight: FontWeight.w600,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if(fresh.hasPendingWrites)
+                    Icon(Icons.cloud_upload_outlined),
+                  const SizedBox(height: 4,),
+                  Text(
+                    progress,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: allDone
+                          ? const Color(0xFF4CAF82)
+                          : Colors.grey.shade500,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
