@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 class PageHeader extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final VoidCallback onBack;
   final Widget? action; 
 
   const PageHeader({
     super.key,
     required this.title,
+    this.subtitle,
     required this.onBack,
     this.action,
   });
@@ -79,8 +81,9 @@ class PageHeader extends StatelessWidget {
                       ),
                     ),
 
+                    if(subtitle != null)
                     Text(
-                      "Project Details",
+                      subtitle!,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w300,
