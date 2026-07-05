@@ -577,14 +577,14 @@ class _TaskCard extends StatelessWidget {
       // ── Left swipe → status options ──
       startActionPane: ActionPane(
         motion: const ScrollMotion(),
-        extentRatio: 0.6,
+        extentRatio: 0.3,
         children: ProjectTaskStatus.values
             .where((s) => s != task.status)
             .map(
               (status) => CustomSlidableAction(
                 onPressed: (_) => _changeStatus(status),
-                backgroundColor: _statusColor[status]!,
-                foregroundColor: Colors.white,
+                backgroundColor: Colors.transparent,
+                foregroundColor: _statusColor[status]!,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -607,23 +607,22 @@ class _TaskCard extends StatelessWidget {
       // ── Right swipe → delete ──
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        extentRatio: 0.2,
+        extentRatio: 0.15,
         children: [
           CustomSlidableAction(
             onPressed: (_) => _deleteTask(),
-            backgroundColor: const Color(0xFFFF6B6B),
-            foregroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
             borderRadius: const BorderRadius.horizontal(
               right: Radius.circular(14),
             ),
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.delete_outline_rounded, size: 22),
+                Icon(Icons.delete, size: 22, color: Colors.red,),
                 SizedBox(height: 4),
                 Text(
                   'Delete',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.red),
                 ),
               ],
             ),
