@@ -16,6 +16,7 @@ class Project {
   final List<String> taskIds;
   final int totalTasks;
   final int completedTasks;
+  final bool hasPendingWrites;
 
   Project({
     required this.id,
@@ -29,7 +30,7 @@ class Project {
     this.status = ProjectStatus.todo,
     DateTime? createdAt,
     List<String>? taskIds,
-    
+    this.hasPendingWrites = false,
   }) : createdAt = createdAt ?? DateTime.now(),
        taskIds = taskIds ?? [];
 
@@ -56,6 +57,7 @@ class Project {
       taskIds: taskIds ?? this.taskIds,
       totalTasks: totalTasks ?? this.totalTasks,
       completedTasks: completedTasks ?? this.completedTasks,
+    
     );
   }
 }

@@ -37,6 +37,7 @@ class ProjectServices {
       taskIds: List<String>.from(map['taskIds']?? []),
       totalTasks: map['totalTasks'] as int? ?? 0,
       completedTasks: map['completedTasks'] as int? ?? 0,
+      hasPendingWrites: doc.metadata.hasPendingWrites,
     );
   }
 
@@ -73,7 +74,7 @@ class ProjectServices {
   Stream<List<Project>> watchProjects(){
     return _collection
       .orderBy("createdAt", descending: true)
-      .snapshots()
+      .snapshots(includeMetadataChanges: true)
       .map((snapshot) => snapshot.docs.map(_fromDoc).toList());
   }
 
