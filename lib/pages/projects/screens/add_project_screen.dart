@@ -6,7 +6,8 @@ import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/widgets/page_header.dart';
 
 class AddProjectScreen extends StatefulWidget {
-  const AddProjectScreen({super.key});
+  final Project? existingProject;
+  const AddProjectScreen({super.key, this.existingProject});
 
   @override
   State<AddProjectScreen> createState() => _AddProjectScreenState();
@@ -17,13 +18,15 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   final ProjectController _projectController = Get.find<ProjectController>();
-  final _nameController = TextEditingController();
-  final _descController = TextEditingController();
-  final _deadlinecontroller = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _descController;
+  late final TextEditingController _deadlineController;
 
-  DateTime? _deadLine;
-  ProjectPriority _priority = ProjectPriority.medium;
-  Color _selectedColor = const Color(0xFF666AF6);
+  late DateTime? _deadLine;
+  late ProjectPriority _priority;
+  late Color _selectedColor;
+
+  bool get _isEditing => widget.existingProject != null;
 
   //Color options
   static const List<Color> _colorOptions = [
@@ -50,10 +53,25 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    final p = widget.existingProject;
+
+    _nameController = TextEditingController(text: p?.name ?? "");
+    _descController = TextEditingController(text: p?.description ?? "");
+    _deadlineController = TextEditingController(
+      text: p != null ? DateFormat('dd MMM yyyy').format(p.deadline) : '',
+    );
+    _deadLine = p?.deadline;
+    _priority = p?.priority ?? ProjectPriority.medium;
+    _selectedColor = p?.color ?? const Color(0xFF666AF6);
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _descController.dispose();
-    _deadlinecontroller.dispose();
+    _deadlineController.dispose();
     super.dispose();
   }
 
@@ -61,13 +79,34 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   Future<void> _pickDeadline() async {
     final picked = await showDatePicker(
       context: context,
+      initialDate: _deadLine ?? DateTime.now().add(const Duration(days: 7)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF666AF6),
+            onPrimary: Colors.white,
+            surface: Colors.white,
+            onSurface: Color(0xFF25343B),
+          ),
+          datePickerTheme: const DatePickerThemeData(
+            headerBackgroundColor: Color(0xFF666AF6),
+            headerForegroundColor: Colors.white,
+            headerHeadlineStyle: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        child: child!,
+      ),
     );
     if (picked != null) {
       setState(() {
         _deadLine = picked;
-        _deadlinecontroller.text = DateFormat('dd MMM yyyy').format(picked);
+        _deadlineController.text = DateFormat('dd MMM yyyy').format(picked);
       });
     }
   }
@@ -77,22 +116,42 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
     setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
     if (!_formKey.currentState!.validate()) return;
 
-    _projectController.createProject(
-      name: _nameController.text.trim(),
-      description: _descController.text.trim(),
-      deadline: _deadLine!,
-      priority: _priority,
-      color: _selectedColor,
-    );
-    Get.back();
-    Get.snackbar(
-      "Project Created", 
-      "${_nameController.text.trim()} has been added",
-      backgroundColor: const Color(0xFF4CAF82),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.all(16),
+    if (_isEditing) {
+      final updated = widget.existingProject!.copyWith(
+        name: _nameController.text.trim(),
+        description: _descController.text.trim(),
+        deadline: _deadLine,
+        priority: _priority,
+        color: _selectedColor,
       );
+      await _projectController.updateProject(updated);
+      Get.back();
+      Get.snackbar(
+        "Project Updated",
+        '${updated.name} has been updated.',
+        backgroundColor: const Color(0xFF4CAF82),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(16),
+      );
+    } else {
+      await _projectController.createProject(
+        name: _nameController.text.trim(),
+        description: _descController.text.trim(),
+        deadline: _deadLine!,
+        priority: _priority,
+        color: _selectedColor,
+      );
+      Get.back();
+      Get.snackbar(
+        "Project Created",
+        "${_nameController.text.trim()} has been added",
+        backgroundColor: const Color(0xFF4CAF82),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(16),
+      );
+    }
   }
 
   @override
@@ -101,7 +160,10 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
       body: Column(
         children: [
           //header
-          PageHeader(title: "New Project", onBack: ()=>Get.back()),
+          PageHeader(
+            title: _isEditing ? "Edit Project" : "New Project",
+            onBack: () => Get.back(),
+          ),
 
           //form
           Expanded(
@@ -110,41 +172,33 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
               child: Form(
                 key: _formKey,
                 autovalidateMode: _autovalidateMode,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Text(
-                      //   "Project Details",
-                      //   style: TextStyle(
-                      //     fontWeight: FontWeight.w600,
-                      //     fontSize: 20,
-                      //   ),
-                      // ),
-                      const SizedBox(height: 12),
-                      _buildLabel("Project Name"),
-                      // const SizedBox(height: 8,),
-                      _nameTextField(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabel("Project Name"),
+                    const SizedBox(height: 8),
+                    _nameTextField(),
 
-                      const SizedBox(height: 12),
-                      _buildLabel("Description"),
-                      _descTextField(),
+                    const SizedBox(height: 20),
+                    _buildLabel("Description"),
+                    const SizedBox(height: 8),
+                    _descTextField(),
 
-                      const SizedBox(height: 12),
-                      _buildLabel("Deadline"),
-                      _deadLineInputField(),
+                    const SizedBox(height: 20),
+                    _buildLabel("Deadline"),
+                    const SizedBox(height: 8),
+                    _deadLineInputField(),
 
-                      const SizedBox(height: 12),
-                      _buildLabel("Priority"),
-                      _dropDownInputField(),
+                    const SizedBox(height: 20),
+                    _buildLabel("Priority"),
+                    const SizedBox(height: 8),
+                    _dropDownInputField(),
 
-                      const SizedBox(height: 12),
-                      _buildLabel("Color Tag"),
-                      const SizedBox(height: 10),
-                      _buildColorPicker(),
-                    ],
-                  ),
+                    const SizedBox(height: 20),
+                    _buildLabel("Color Tag"),
+                    const SizedBox(height: 12),
+                    _buildColorPicker(),
+                  ],
                 ),
               ),
             ),
@@ -167,7 +221,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                   0xFF666AF6,
                 ).withOpacity(0.6),
                 elevation: 4,
-                shadowColor: const Color(0xFF666AF6),
+                shadowColor: const Color(0xFF666AF6).withOpacity(0.4),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -181,7 +235,13 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                         strokeWidth: 2.5,
                       ),
                     )
-                  : const Text('Create Project'),
+                  : Text(
+                      _isEditing ? 'update Project' : 'Create Project',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -266,38 +326,14 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
 
   Widget _deadLineInputField() {
     return TextFormField(
-      controller: _deadlinecontroller,
+      controller: _deadlineController,
       readOnly: true,
       onTap: _pickDeadline,
-      decoration: InputDecoration(
-        suffixIcon: Icon(Icons.calendar_today),
-        hintText: "select deadline",
-        hintStyle: const TextStyle(color: Color(0xFFBDBDBD), fontSize: 14),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF666AF6), width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFFF6B6B)),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
+      decoration: _inputDecoration("Select deadline").copyWith(
+        suffixIcon: const Icon(
+          Icons.calendar_today,
+          color: Color(0xFF9E9E9E),
+          size: 18,
         ),
       ),
       validator: (value) {

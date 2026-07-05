@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/pages/projects/controllers/project_controller.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
+import 'package:todo_app/pages/projects/screens/add_project_screen.dart';
 import 'package:todo_app/pages/projects/screens/add_task_screen.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 import 'package:todo_app/pages/projects/tasks/model/project_task_model.dart';
@@ -42,16 +43,109 @@ class _ProjectDetailState extends State<ProjectDetail> {
     ProjectPriority.high: Color(0xFFFF6B6B),
   };
 
+  //Delete project
+  void _deleteProject(){
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16)
+        ),
+        title: const Text(
+          "Delete Project",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${widget.project.name}"? All tasks inside will also be deleted.',
+          style: const TextStyle(fontSize: 14, color: Colors.blueGrey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: ()=> Get.back(), 
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.blueGrey),
+            )
+          ),
+          ElevatedButton(
+            onPressed: (){
+              Get.back();
+              Get.back();
+              _projectController.deleteProject(widget.project.id);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B6B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)
+              )
+            ), 
+            child: const Text("Delete")
+          )
+        ],
+      )
+    );
+  }
+
+  //edit project
+  void _editProject(Project project){
+    Get.to(()=> AddProjectScreen(existingProject: project));
+  }
+
+  Widget _buildActionMenu(Project project){
+    return PopupMenuButton(
+      icon: const CircleAvatar(
+        radius: 18,
+        backgroundColor: Colors.white24,
+        child: Icon(Icons.more_vert, color: Colors.white, size: 20,),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12)
+      ),
+      onSelected: (value){
+        if(value == 'edit') _editProject(project);
+        if(value == 'delete') _deleteProject();
+      },
+      itemBuilder: (_)=> [
+        const PopupMenuItem(
+          value: "edit",
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, size: 18, color: Color(0xFF666AF6),),
+              SizedBox(width: 10,),
+              Text("Edit Project"),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: "delete",
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFFF6B6B),),
+              SizedBox(width: 10,),
+              Text("Delete Project", style: TextStyle( color: Color(0xFFFF6B6B)),)
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final project = widget.project;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FA),
       body: Column(
         children: [
           // ── Header ──
-          PageHeader(title: project.name,subtitle: "Project Details", onBack: ()=> Get.back()),
+          Obx((){
+            final fresh = _projectController.projects.firstWhere(
+              (p)=> p.id == widget.project.id,
+              orElse: () => widget.project,
+            );
+            
+          return PageHeader(title: fresh.name,subtitle: "Project Details", onBack: ()=> Get.back(), action: _buildActionMenu(fresh),);
+          }
+          ),
 
           // ── Scrollable body ──
           Expanded(
@@ -60,8 +154,14 @@ class _ProjectDetailState extends State<ProjectDetail> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Obx((){
+                    final fresh = _projectController.projects.firstWhere(
+                      (p)=> p.id == widget.project.id,
+                      orElse: () => widget.project,
+                    );
+                    return _buildInfoCard(fresh);
+                  }),
                   // ── Project info card ──
-                  _buildInfoCard(project),
 
                   const SizedBox(height: 20),
 
