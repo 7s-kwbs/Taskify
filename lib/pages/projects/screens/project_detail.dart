@@ -44,12 +44,10 @@ class _ProjectDetailState extends State<ProjectDetail> {
   };
 
   //Delete project
-  void _deleteProject(){
+  void _deleteProject() {
     Get.dialog(
       AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16)
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           "Delete Project",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -60,14 +58,14 @@ class _ProjectDetailState extends State<ProjectDetail> {
         ),
         actions: [
           TextButton(
-            onPressed: ()=> Get.back(), 
+            onPressed: () => Get.back(),
             child: const Text(
               'Cancel',
               style: TextStyle(color: Colors.blueGrey),
-            )
+            ),
           ),
           ElevatedButton(
-            onPressed: (){
+            onPressed: () {
               Get.back();
               Get.back();
               _projectController.deleteProject(widget.project.id);
@@ -76,42 +74,40 @@ class _ProjectDetailState extends State<ProjectDetail> {
               backgroundColor: const Color(0xFFFF6B6B),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)
-              )
-            ), 
-            child: const Text("Delete")
-          )
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text("Delete"),
+          ),
         ],
-      )
+      ),
     );
   }
 
   //edit project
-  void _editProject(Project project){
-    Get.to(()=> AddProjectScreen(existingProject: project));
+  void _editProject(Project project) {
+    Get.to(() => AddProjectScreen(existingProject: project));
   }
 
-  Widget _buildActionMenu(Project project){
+  Widget _buildActionMenu(Project project) {
     return PopupMenuButton(
       icon: const CircleAvatar(
         radius: 18,
         backgroundColor: Colors.white24,
-        child: Icon(Icons.more_vert, color: Colors.white, size: 20,),
+        child: Icon(Icons.more_vert, color: Colors.white, size: 20),
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12)
-      ),
-      onSelected: (value){
-        if(value == 'edit') _editProject(project);
-        if(value == 'delete') _deleteProject();
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (value) {
+        if (value == 'edit') _editProject(project);
+        if (value == 'delete') _deleteProject();
       },
-      itemBuilder: (_)=> [
+      itemBuilder: (_) => [
         const PopupMenuItem(
           value: "edit",
           child: Row(
             children: [
-              Icon(Icons.edit_outlined, size: 18, color: Color(0xFF666AF6),),
-              SizedBox(width: 10,),
+              Icon(Icons.edit_outlined, size: 18, color: Color(0xFF666AF6)),
+              SizedBox(width: 10),
               Text("Edit Project"),
             ],
           ),
@@ -120,12 +116,19 @@ class _ProjectDetailState extends State<ProjectDetail> {
           value: "delete",
           child: Row(
             children: [
-              Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFFF6B6B),),
-              SizedBox(width: 10,),
-              Text("Delete Project", style: TextStyle( color: Color(0xFFFF6B6B)),)
+              Icon(
+                Icons.delete_outline_rounded,
+                size: 18,
+                color: Color(0xFFFF6B6B),
+              ),
+              SizedBox(width: 10),
+              Text(
+                "Delete Project",
+                style: TextStyle(color: Color(0xFFFF6B6B)),
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
@@ -137,15 +140,19 @@ class _ProjectDetailState extends State<ProjectDetail> {
       body: Column(
         children: [
           // ── Header ──
-          Obx((){
+          Obx(() {
             final fresh = _projectController.projects.firstWhere(
-              (p)=> p.id == widget.project.id,
+              (p) => p.id == widget.project.id,
               orElse: () => widget.project,
             );
-            
-          return PageHeader(title: fresh.name,subtitle: "Project Details", onBack: ()=> Get.back(), action: _buildActionMenu(fresh),);
-          }
-          ),
+
+            return PageHeader(
+              title: fresh.name,
+              subtitle: "Project Details",
+              onBack: () => Get.back(),
+              action: _buildActionMenu(fresh),
+            );
+          }),
 
           // ── Scrollable body ──
           Expanded(
@@ -154,15 +161,15 @@ class _ProjectDetailState extends State<ProjectDetail> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Obx((){
+                  Obx(() {
                     final fresh = _projectController.projects.firstWhere(
-                      (p)=> p.id == widget.project.id,
+                      (p) => p.id == widget.project.id,
                       orElse: () => widget.project,
                     );
                     return _buildInfoCard(fresh);
                   }),
-                  // ── Project info card ──
 
+                  // ── Project info card ──
                   const SizedBox(height: 20),
 
                   // ── Progress ──
@@ -607,8 +614,30 @@ class _TaskCard extends StatelessWidget {
       // ── Right swipe → delete ──
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        extentRatio: 0.15,
+        extentRatio: 0.3,
         children: [
+          CustomSlidableAction(
+            onPressed: (_) => Get.to(()=> AddTaskScreen(project: project, existingTask: task,)),
+            backgroundColor: Colors.transparent,
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(14),
+            ),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.edit, size: 22, color: Colors.blue),
+                SizedBox(height: 4),
+                Text(
+                  'Edit',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ),
           CustomSlidableAction(
             onPressed: (_) => _deleteTask(),
             backgroundColor: Colors.transparent,
@@ -618,11 +647,15 @@ class _TaskCard extends StatelessWidget {
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.delete, size: 22, color: Colors.red,),
+                Icon(Icons.delete, size: 22, color: Colors.red),
                 SizedBox(height: 4),
                 Text(
                   'Delete',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.red),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                  ),
                 ),
               ],
             ),
