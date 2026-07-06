@@ -124,7 +124,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
         priority: _priority,
         color: _selectedColor,
       );
-      await _projectController.updateProject(updated);
+       _projectController.updateProject(updated);
       Get.back();
       Get.snackbar(
         "Project Updated",
@@ -135,7 +135,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
         margin: const EdgeInsets.all(16),
       );
     } else {
-      await _projectController.createProject(
+       _projectController.createProject(
         name: _nameController.text.trim(),
         description: _descController.text.trim(),
         deadline: _deadLine!,

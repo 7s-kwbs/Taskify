@@ -45,7 +45,7 @@ class ProjectController extends GetxController {
         color: color,
       );
 
-      await _service.createProject(project);
+       _service.createProject(project);
       return true;
     } catch (e) {
       errorMessage.value = "Failed to create Project.";

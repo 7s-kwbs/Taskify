@@ -53,16 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFECEAEA),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => TodoPage()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      backgroundColor: const Color(0xFFF5F5FA),
       body: Column(
         children: [
           DashboardHeader(onSettingsTap: ()=> Get.to(SettingsScreen())),
@@ -287,7 +278,7 @@ class ProjectCard extends StatelessWidget {
       final progress = '${fresh.completedTasks}/${fresh.totalTasks}';
       final bool allDone =
           fresh.totalTasks > 0 &&
-          fresh.completedTasks == project.totalTasks;
+          fresh.completedTasks == fresh.totalTasks;
 
       return InkWell(
         onTap: () => Get.to(() => ProjectDetail(project: fresh)),
@@ -358,7 +349,7 @@ class ProjectCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if(fresh.hasPendingWrites)
-                    Icon(Icons.cloud_upload_outlined),
+                    Icon(Icons.cloud_upload_outlined, size: 14, color: Colors.orange.shade400,),
                   const SizedBox(height: 4,),
                   Text(
                     progress,
