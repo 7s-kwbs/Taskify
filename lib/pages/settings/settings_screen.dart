@@ -413,7 +413,8 @@ class SettingsScreen extends StatelessWidget {
                                   );
 
                                   if (success) {
-                                    Get.back();
+                                    authController.logout();
+
                                     Get.snackbar(
                                       'Password Updated',
                                       'Your password has been changed successfully.',
