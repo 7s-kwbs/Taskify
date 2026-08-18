@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/pages/my_task/task_model.dart';
-import 'package:todo_app/pages/my_task/task_sample_data.dart';
+import 'package:intl/intl.dart';
+import 'package:todo_app/pages/my_task/controllers/task_controller.dart';
 import 'package:todo_app/widgets/bottom_nav.dart';
 import 'package:todo_app/widgets/page_header.dart';
 
 class MytaskScreen extends StatelessWidget {
   const MytaskScreen({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
+    final TaskController taskController = Get.find<TaskController>();
+    
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 236, 234, 234),
+      backgroundColor: const Color(0xFFF5F5FA),
       body: Column(
         children: [
           PageHeader(title: "My Tasks", onBack: ()=> Get.back()),
@@ -31,31 +33,31 @@ class MytaskScreen extends StatelessWidget {
                     children: [
                       _SectionHeader(title: "Today"),
                       SizedBox(height: 5),
-                      ...todayTasks.map(
+                      ...taskController.todayTasks.map(
                         (task) => _TaskCard(
                           title: task.title,
-                          date: task.date,
-                          label: task.labels,
+                          date: DateFormat('dd MMM yyyy').format(task.dueDate!),
+                          labels: task.labels,
                         ),
                       ),
                       SizedBox(height: 12),
                       _SectionHeader(title: "Tommorow"),
                       SizedBox(height: 5),
-                      ...tomorrowTasks.map(
+                      ...taskController.tomorrowTasks.map(
                         (task) => _TaskCard(
                           title: task.title,
-                          date: task.date,
-                          label: task.labels,
+                          date: DateFormat('dd MMM yyyy').format(task.dueDate!),
+                          labels: task.labels,
                         ),
                       ),
                       SizedBox(height: 12),
                       _SectionHeader(title: "This week"),
                       SizedBox(height: 5),
-                      ...thisWeekTasks.map(
+                      ...taskController.thisWeekTasks.map(
                         (task) => _TaskCard(
                           title: task.title,
-                          date: task.date,
-                          label: task.labels,
+                          date: DateFormat('dd MMM yyyy').format(task.dueDate!),
+                          labels: task.labels,
                         ),
                       ),
                     ],
@@ -96,11 +98,11 @@ class MytaskScreen extends StatelessWidget {
 class _TaskCard extends StatelessWidget {
   final String title;
   final String date;
-  final List<TaskLabel> label;
+  final List<String> labels;
   const _TaskCard({
     required this.title,
     required this.date,
-    required this.label,
+    required this.labels,
   });
 
   @override
@@ -139,7 +141,7 @@ class _TaskCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _CircleCheckbox(),
+
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -167,9 +169,9 @@ class _TaskCard extends StatelessWidget {
               ),
             ),
             Row(
-              children: label
+              children: labels
                   .map(
-                    (label) => _LabelChip(text: label.text, color: label.color),
+                    (label) => _LabelChip(text: label,),
                   )
                   .toList(),
             ),
@@ -182,8 +184,7 @@ class _TaskCard extends StatelessWidget {
 
 class _LabelChip extends StatelessWidget {
   final String text;
-  final Color color;
-  const _LabelChip({required this.text, required this.color});
+  const _LabelChip({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +192,7 @@ class _LabelChip extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 2),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: Colors.amber,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -206,19 +207,6 @@ class _LabelChip extends StatelessWidget {
   }
 }
 
-class _CircleCheckbox extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 18,
-      height: 18,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.deepPurpleAccent, width: 4),
-      ),
-    );
-  }
-}
 
 class _SectionHeader extends StatelessWidget {
   final String title;
