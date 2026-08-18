@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/pages/dashboard/label_item_model.dart';
-import 'package:todo_app/pages/dashboard/status_item_model.dart';
-import 'package:todo_app/pages/labels/add_label_screen.dart';
-import 'package:todo_app/pages/labels/label_detail_screen.dart';
-import 'package:todo_app/pages/my_task/my_task_screen.dart';
+import 'package:todo_app/pages/labels/controllers/label_controller.dart';
+import 'package:todo_app/pages/labels/screeens/add_label_screen.dart';
+import 'package:todo_app/pages/labels/screeens/label_detail_screen.dart';
+import 'package:todo_app/pages/my_task/screens/my_task_screen.dart';
+import 'package:todo_app/pages/my_task/controllers/task_controller.dart';
 import 'package:todo_app/pages/projects/controllers/project_controller.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/screens/add_project_screen.dart';
@@ -12,7 +13,6 @@ import 'package:todo_app/pages/projects/screens/project_detail.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 import 'package:todo_app/pages/settings/settings_screen.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
-import '../todo_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -31,8 +31,10 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    _projectController = Get.put(ProjectController());
-    Get.put(ProjectTaskController());
+    _projectController = Get.put(ProjectController(), permanent: false);
+    Get.put(ProjectTaskController(), permanent: false);
+    Get.put(TaskController(), permanent: false);
+    Get.put(LabelController(), permanent: false);
   }
 
   // ── Hardcoded labels and statuses (until you build those features) ─
@@ -44,19 +46,13 @@ class _DashboardPageState extends State<DashboardPage> {
     LabelItem(color: Color(0xFF3CB17A), title: 'Habit', count: 3),
   ];
 
-  final List<StatusItem> statuses = const [
-    StatusItem(color: Color(0xFFE4572E), title: 'To do'),
-    StatusItem(color: Color(0xFFE0A93C), title: 'Doing'),
-    StatusItem(color: Color(0xFF3CB17A), title: 'Done'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FA),
       body: Column(
         children: [
-          DashboardHeader(onSettingsTap: ()=> Get.to(SettingsScreen())),
+          DashboardHeader(onSettingsTap: () => Get.to(SettingsScreen())),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -143,22 +139,24 @@ class _DashboardPageState extends State<DashboardPage> {
                     onAdd: () {},
                   ),
                   if (statusExpanded)
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: statuses
-                            .map(
-                              (status) => Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: StatusChip(
-                                  color: status.color,
-                                  title: status.title,
-                                ),
+                    Obx(() {
+                      final taskController = Get.find<TaskController>();
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: StatusChip(
+                                color: const Color(0xFFE4572E), 
+                                title: "To do",
+                                count: taskController.todoCount,
                               ),
                             )
-                            .toList(),
-                      ),
-                    ),
+                          ],
+                        ),
+                      );
+                    }),
                 ],
               ),
             ),
@@ -272,13 +270,12 @@ class ProjectCard extends StatelessWidget {
 
     return Obx(() {
       final fresh = projectController.projects.firstWhere(
-        (p)=> p.id == project.id,
-        orElse: ()=> project
+        (p) => p.id == project.id,
+        orElse: () => project,
       );
       final progress = '${fresh.completedTasks}/${fresh.totalTasks}';
       final bool allDone =
-          fresh.totalTasks > 0 &&
-          fresh.completedTasks == fresh.totalTasks;
+          fresh.totalTasks > 0 && fresh.completedTasks == fresh.totalTasks;
 
       return InkWell(
         onTap: () => Get.to(() => ProjectDetail(project: fresh)),
@@ -332,9 +329,7 @@ class ProjectCard extends StatelessWidget {
                       LinearProgressIndicator(
                         value: fresh.completedTasks / fresh.totalTasks,
                         backgroundColor: Colors.grey.shade200,
-                        color: allDone
-                            ? const Color(0xFF4CAF82)
-                            : fresh.color,
+                        color: allDone ? const Color(0xFF4CAF82) : fresh.color,
                         borderRadius: BorderRadius.circular(4),
                         minHeight: 4,
                       ),
@@ -348,9 +343,13 @@ class ProjectCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if(fresh.hasPendingWrites)
-                    Icon(Icons.cloud_upload_outlined, size: 14, color: Colors.orange.shade400,),
-                  const SizedBox(height: 4,),
+                  if (fresh.hasPendingWrites)
+                    Icon(
+                      Icons.cloud_upload_outlined,
+                      size: 14,
+                      color: Colors.orange.shade400,
+                    ),
+                  const SizedBox(height: 4),
                   Text(
                     progress,
                     style: TextStyle(
@@ -375,7 +374,8 @@ class ProjectCard extends StatelessWidget {
 class StatusChip extends StatelessWidget {
   final Color color;
   final String title;
-  const StatusChip({super.key, required this.color, required this.title});
+  final int count;
+  const StatusChip({super.key, required this.color, required this.title, required this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -409,6 +409,22 @@ class StatusChip extends StatelessWidget {
               color: Colors.blueGrey,
             ),
           ),
+          const SizedBox(width: 8,),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10)
+            ),
+            child: Text(
+              "$count",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          )
         ],
       ),
     );
