@@ -2,6 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/auth/login_page.dart';
 import 'package:todo_app/pages/dashboard/dashboard_screen.dart';
+import 'package:todo_app/pages/labels/controllers/label_controller.dart';
+import 'package:todo_app/pages/my_task/controllers/task_controller.dart';
+import 'package:todo_app/pages/projects/controllers/project_controller.dart';
+import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -16,6 +20,7 @@ class AuthController extends GetxController {
   bool get isLoggedIn => currentUser.value != null;
   String get displayName => currentUser.value?.displayName ?? 'User'; // ← add
   String get email => currentUser.value?.email ?? '';
+
 
   @override
   void onInit() {
@@ -76,7 +81,12 @@ class AuthController extends GetxController {
 
   //Logout
   Future<void> logout() async {
-    await _auth.signOut();
+    await Get.delete<ProjectController>();
+    await Get.delete<ProjectTaskController>();
+    await Get.delete<TaskController>();
+    await Get.delete<LabelController>();
+
+    await _auth.signOut();        
   }
 
   //Password reset
