@@ -160,7 +160,7 @@ flutter run
 **Narendra Chapagain**
 
 - Portfolio: [narendrachapagain.com.np](https://narendrachapagain.com.np)
-- GitHub: [@7s_kwbs](https://github.com/7s_kwbs)
+- GitHub: [@7s_kwbs](https://github.com/7s-kwbs)
 
 ## License
 
