@@ -31,6 +31,12 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildSettingsTile(
+                    icon: Icons.person_outline_rounded,
+                    title: 'Edit Profile',
+                    onTap: () => _showEditProfileDialog(authController),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildSettingsTile(
                     icon: Icons.lock_outline_rounded,
                     title: 'Change Password',
                     onTap: () => _showChangePasswordDialog(authController),
@@ -199,6 +205,77 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _showEditProfileDialog(AuthController authController) {
+    final user = authController.currentUser.value;
+    if (user == null) return;
+
+    final nameController = TextEditingController(text: user.displayName ?? '');
+    final emailController = TextEditingController(text: user.email ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Edit Profile'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Name is required'
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  final email = value?.trim() ?? '';
+                  if (email.isEmpty || !email.contains('@')) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              final updated = await authController.updateProfile(
+                name: nameController.text,
+                email: emailController.text,
+              );
+              if (updated && Get.isDialogOpen == true) Get.back();
+              if (!updated) {
+                Get.snackbar(
+                  'Profile not updated',
+                  authController.errorMessage.value.isEmpty
+                      ? 'Please try again.'
+                      : authController.errorMessage.value,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF666AF6),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Change password dialog ────────────────────────────────────────
   void _showChangePasswordDialog(AuthController authController) {
     authController.errorMessage.value = '';
@@ -241,10 +318,7 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     const Text(
                       'Enter your current and new password below.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.blueGrey,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.blueGrey),
                     ),
 
                     const SizedBox(height: 20),
@@ -404,13 +478,13 @@ class SettingsScreen extends StatelessWidget {
 
                                   setState(() => isLoading = true);
 
-                                  final success =
-                                      await authController.changePassword(
-                                    oldPassword:
-                                        oldPasswordController.text.trim(),
-                                    newPassword:
-                                        newPasswordController.text.trim(),
-                                  );
+                                  final success = await authController
+                                      .changePassword(
+                                        oldPassword: oldPasswordController.text
+                                            .trim(),
+                                        newPassword: newPasswordController.text
+                                            .trim(),
+                                      );
 
                                   if (success) {
                                     authController.logout();
@@ -434,8 +508,9 @@ class SettingsScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF666AF6),
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor:
-                                const Color(0xFF666AF6).withOpacity(0.6),
+                            disabledBackgroundColor: const Color(
+                              0xFF666AF6,
+                            ).withOpacity(0.6),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -455,8 +530,7 @@ class SettingsScreen extends StatelessWidget {
                                 )
                               : const Text(
                                   'Update',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w600),
+                                  style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                         ),
                       ],
@@ -476,9 +550,7 @@ class SettingsScreen extends StatelessWidget {
   void _showLogoutDialog(AuthController authController) {
     Get.dialog(
       AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Logout',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -522,8 +594,7 @@ class SettingsScreen extends StatelessWidget {
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: const Color(0xFFF5F5FA),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: Color(0xFFE0E0E0)),

@@ -1,14 +1,10 @@
 import 'package:get/get.dart';
-import 'package:todo_app/pages/settings/controllers/productivity_settings_controller.dart';
 import 'package:todo_app/pages/my_task/models/task_model.dart';
 import 'package:todo_app/pages/my_task/services/task_service.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskController extends GetxController {
   final TaskService _service = TaskService();
-  final ProductivitySettingsController _settings = Get.put(
-    ProductivitySettingsController(),
-  );
 
   // ── Observable state ──────────────────────────────────────────────
   final RxList<Task> tasks = <Task>[].obs;
@@ -108,8 +104,7 @@ class TaskController extends GetxController {
   List<Task> get activeTasks =>
       tasks.where((task) => task.status != TaskStatus.done).toList();
 
-  List<Task> get visibleTasks =>
-      _settings.showCompletedTasks.value ? tasks.toList() : activeTasks;
+  List<Task> get visibleTasks => activeTasks;
 
   // getter to filters acccrodig to due date
   bool _isSameDay(DateTime date1, DateTime? date2) {
