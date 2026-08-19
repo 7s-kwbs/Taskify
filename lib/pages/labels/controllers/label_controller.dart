@@ -7,6 +7,27 @@ import 'package:uuid/uuid.dart';
 class LabelController extends GetxController {
   final LabelService _service = LabelService();
 
+  static final List<Label> _defaultLabels = [
+    Label(
+      id: 'default_work',
+      name: 'Work',
+      color: Color(0xFF666AF6),
+      createdAt: DateTime(2026, 1, 1),
+    ),
+    Label(
+      id: 'default_personal',
+      name: 'Personal',
+      color: Color(0xFF4CAF82),
+      createdAt: DateTime(2026, 1, 2),
+    ),
+    Label(
+      id: 'default_urgent',
+      name: 'Urgent',
+      color: Color(0xFFE4572E),
+      createdAt: DateTime(2026, 1, 3),
+    ),
+  ];
+
   // ── Observable state ──────────────────────────────────────────────
   final RxList<Label> labels = <Label>[].obs;
   final RxString errorMessage = ''.obs;
@@ -23,6 +44,15 @@ class LabelController extends GetxController {
       (data) => labels.value = data,
       onError: (e) => errorMessage.value = 'Failed to load labels.',
     );
+    _seedDefaultLabels();
+  }
+
+  Future<void> _seedDefaultLabels() async {
+    try {
+      await _service.seedDefaultLabels(_defaultLabels);
+    } catch (e) {
+      errorMessage.value = 'Failed to load default labels.';
+    }
   }
 
   // ── Create ────────────────────────────────────────────────────────

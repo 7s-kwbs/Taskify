@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/pages/labels/controllers/label_controller.dart';
 import 'package:todo_app/pages/my_task/controllers/task_controller.dart';
+import 'package:todo_app/pages/my_task/models/task_model.dart';
+import 'package:todo_app/pages/my_task/screens/add_independent_task_screen.dart';
 import 'package:todo_app/widgets/bottom_nav.dart';
+import 'package:todo_app/widgets/empty_state.dart';
 import 'package:todo_app/widgets/page_header.dart';
 
 class MytaskScreen extends StatelessWidget {
   const MytaskScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final TaskController taskController = Get.find<TaskController>();
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FA),
       body: Column(
         children: [
-          PageHeader(title: "My Tasks", onBack: ()=> Get.back()),
+          PageHeader(title: "My Tasks", onBack: () => Get.back()),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -28,39 +32,32 @@ class MytaskScreen extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    children: [
-                      _SectionHeader(title: "Today"),
-                      SizedBox(height: 5),
-                      ...taskController.todayTasks.map(
-                        (task) => _TaskCard(
-                          title: task.title,
-                          date: DateFormat('dd MMM yyyy').format(task.dueDate!),
-                          labels: task.labels,
+                  Obx(
+                    () => ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                      children: [
+                        ..._buildTaskSection(
+                          title: 'No due date',
+                          tasks: taskController.noDueDateTasks,
+                          taskController: taskController,
                         ),
-                      ),
-                      SizedBox(height: 12),
-                      _SectionHeader(title: "Tommorow"),
-                      SizedBox(height: 5),
-                      ...taskController.tomorrowTasks.map(
-                        (task) => _TaskCard(
-                          title: task.title,
-                          date: DateFormat('dd MMM yyyy').format(task.dueDate!),
-                          labels: task.labels,
+                        ..._buildTaskSection(
+                          title: 'Today',
+                          tasks: taskController.todayTasks,
+                          taskController: taskController,
                         ),
-                      ),
-                      SizedBox(height: 12),
-                      _SectionHeader(title: "This week"),
-                      SizedBox(height: 5),
-                      ...taskController.thisWeekTasks.map(
-                        (task) => _TaskCard(
-                          title: task.title,
-                          date: DateFormat('dd MMM yyyy').format(task.dueDate!),
-                          labels: task.labels,
+                        ..._buildTaskSection(
+                          title: 'Tomorrow',
+                          tasks: taskController.tomorrowTasks,
+                          taskController: taskController,
                         ),
-                      ),
-                    ],
+                        ..._buildTaskSection(
+                          title: 'This week',
+                          tasks: taskController.thisWeekTasks,
+                          taskController: taskController,
+                        ),
+                      ],
+                    ),
                   ),
                   Positioned(
                     left: 0,
@@ -76,14 +73,14 @@ class MytaskScreen extends StatelessWidget {
                             colors: [
                               Colors.white.withOpacity(0),
                               Colors.white.withOpacity(0.5),
-                              Colors.white.withOpacity(0.8)
+                              Colors.white.withOpacity(0.8),
                             ],
-                            stops: const[0.0,0.4,1]
-                          )
+                            stops: const [0.0, 0.4, 1],
+                          ),
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -93,38 +90,154 @@ class MytaskScreen extends StatelessWidget {
       ),
     );
   }
+
+  List<Widget> _buildTaskSection({
+    required String title,
+    required List<Task> tasks,
+    required TaskController taskController,
+  }) {
+    return [
+      _SectionHeader(title: title),
+      const SizedBox(height: 5),
+      if (tasks.isEmpty)
+        EmptyStateWidget(
+          icon: Icons.inbox_outlined,
+          title: 'No $title tasks',
+          subtitle: 'Tasks scheduled for this period will appear here',
+        )
+      else
+        ...tasks.map(
+          (task) => _TaskCard(task: task, taskController: taskController),
+        ),
+      const SizedBox(height: 12),
+    ];
+  }
 }
 
 class _TaskCard extends StatelessWidget {
-  final String title;
-  final String date;
-  final List<String> labels;
-  const _TaskCard({
-    required this.title,
-    required this.date,
-    required this.labels,
-  });
+  final Task task;
+  final TaskController taskController;
+
+  const _TaskCard({required this.task, required this.taskController});
+
+  static const Map<TaskStatus, String> _statusLabel = {
+    TaskStatus.todo: 'To do',
+    TaskStatus.doing: 'Doing',
+    TaskStatus.done: 'Done',
+  };
+
+  static const Map<TaskStatus, Color> _statusColor = {
+    TaskStatus.todo: Color(0xFFFF6B6B),
+    TaskStatus.doing: Color(0xFFFFB347),
+    TaskStatus.done: Color(0xFF4CAF82),
+  };
+
+  void _changeStatus(TaskStatus status) {
+    taskController.updateStatus(task.id, task.status, status);
+  }
+
+  void _deleteTask() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Task'),
+        content: Text('Are you sure you want to delete "${task.title}"?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              taskController.deleteTask(task.id);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B6B),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final labelController = Get.find<LabelController>();
+
     return Slidable(
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(), 
-        extentRatio: 0.15,
-        children: [
-          Builder(
-            builder:(context){
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: (){print("button cliked");},
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Icon(Icons.delete, color: Colors.red,),
+      startActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        extentRatio: 0.3,
+        children: TaskStatus.values
+            .where((status) => status != task.status)
+            .map(
+              (status) => CustomSlidableAction(
+                onPressed: (_) => _changeStatus(status),
+                backgroundColor: Colors.transparent,
+                foregroundColor: _statusColor[status],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.swap_horiz_rounded, size: 20),
+                    const SizedBox(height: 4),
+                    Text(
+                      _statusLabel[status]!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            }
-          )
-        ]),
+              ),
+            )
+            .toList(),
+      ),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        extentRatio: 0.3,
+        children: [
+          CustomSlidableAction(
+            onPressed: (_) =>
+                Get.to(() => AddIndependentTaskScreen(existingTask: task)),
+            backgroundColor: Colors.transparent,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.edit, size: 22, color: Colors.blue),
+                SizedBox(height: 4),
+                Text(
+                  'Edit',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CustomSlidableAction(
+            onPressed: (_) => _deleteTask(),
+            backgroundColor: Colors.transparent,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.delete, size: 22, color: Colors.red),
+                SizedBox(height: 4),
+                Text(
+                  'Delete',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -141,23 +254,32 @@ class _TaskCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-
+            Container(
+              width: 3,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _statusColor[task.status],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    task.title,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: Color.fromARGB(255, 37, 52, 59),
-                      height: 1,
+                      height: 1.2,
                     ),
                   ),
                   Text(
-                    date,
+                    task.dueDate == null
+                        ? 'No due date'
+                        : DateFormat('dd MMM yyyy').format(task.dueDate!),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
@@ -168,13 +290,18 @@ class _TaskCard extends StatelessWidget {
                 ],
               ),
             ),
-            Row(
-              children: labels
-                  .map(
-                    (label) => _LabelChip(text: label,),
-                  )
-                  .toList(),
-            ),
+            if (task.labels.isNotEmpty)
+              Wrap(
+                spacing: 4,
+                children: task.labels
+                    .take(2)
+                    .map(
+                      (labelId) => _LabelChip(
+                        text: labelController.getNameById(labelId),
+                      ),
+                    )
+                    .toList(),
+              ),
           ],
         ),
       ),
@@ -206,7 +333,6 @@ class _LabelChip extends StatelessWidget {
     );
   }
 }
-
 
 class _SectionHeader extends StatelessWidget {
   final String title;

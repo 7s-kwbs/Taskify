@@ -61,18 +61,35 @@ class LabelService {
   // ── Create ────────────────────────────────────────────────────────
 
   Future<void> createLabel(Label label) async {
-    _collection.doc(label.id).set(_toMap(label));
+    await _collection.doc(label.id).set(_toMap(label));
+  }
+
+  Future<void> seedDefaultLabels(List<Label> labels) async {
+    final userRef = _db.collection('users').doc(_uid);
+    final userSnapshot = await userRef.get();
+    if (userSnapshot.data()?['defaultLabelsCreated'] == true) return;
+
+    final batch = _db.batch();
+    for (final label in labels) {
+      batch.set(_collection.doc(label.id), _toMap(label));
+    }
+    batch.set(
+      userRef,
+      {'defaultLabelsCreated': true},
+      SetOptions(merge: true),
+    );
+    await batch.commit();
   }
 
   // ── Update ────────────────────────────────────────────────────────
 
   Future<void> updateLabel(Label label) async {
-    _collection.doc(label.id).update(_toUpdateMap(label));
+    await _collection.doc(label.id).update(_toUpdateMap(label));
   }
 
   // ── Delete ────────────────────────────────────────────────────────
 
   Future<void> deleteLabel(String labelId) async {
-    _collection.doc(labelId).delete();
+    await _collection.doc(labelId).delete();
   }
 }

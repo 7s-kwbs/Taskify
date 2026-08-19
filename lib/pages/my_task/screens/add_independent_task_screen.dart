@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/pages/labels/controllers/label_controller.dart';
 import 'package:todo_app/pages/my_task/controllers/task_controller.dart';
 import 'package:todo_app/pages/my_task/models/task_model.dart';
 import 'package:todo_app/widgets/page_header.dart';
@@ -29,15 +30,6 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
   bool get _isEditing => widget.existingTask != null;
 
   final TaskController _taskController = Get.find<TaskController>();
-
-  // ── Default labels ────────────────────────────────────────────────
-  static const List<Map<String, dynamic>> _defaultLabels = [
-    {'name': 'Study', 'color': Color(0xFF7C7CE0)},
-    {'name': 'Work', 'color': Color(0xFFE08A3C)},
-    {'name': 'Sports', 'color': Color(0xFF445273)},
-    {'name': 'Personal', 'color': Color(0xFFE0B23C)},
-    {'name': 'Habit', 'color': Color(0xFF3CB17A)},
-  ];
 
   static const Map<TaskPriority, String> _priorityLabel = {
     TaskPriority.low: 'Low',
@@ -181,13 +173,15 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
                       controller: _titleController,
                       textCapitalization: TextCapitalization.sentences,
                       style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w500),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
                       decoration: _inputDecoration('Enter task title'),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty){
+                        if (v == null || v.trim().isEmpty) {
                           return 'Task title is required.';
                         }
-                        if (v.trim().length < 3){
+                        if (v.trim().length < 3) {
                           return 'Title must be at least 3 characters.';
                         }
                         return null;
@@ -205,7 +199,8 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
                       textCapitalization: TextCapitalization.sentences,
                       style: const TextStyle(fontSize: 15),
                       decoration: _inputDecoration(
-                          'Enter task description (optional)'),
+                        'Enter task description (optional)',
+                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -218,19 +213,24 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
                       readOnly: true,
                       onTap: _pickDueDate,
                       style: const TextStyle(fontSize: 15),
-                      decoration:
-                          _inputDecoration('Select due date').copyWith(
+                      decoration: _inputDecoration('Select due date').copyWith(
                         suffixIcon: _dueDate != null
                             ? IconButton(
-                                icon: const Icon(Icons.close,
-                                    color: Color(0xFF9E9E9E), size: 18),
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Color(0xFF9E9E9E),
+                                  size: 18,
+                                ),
                                 onPressed: () => setState(() {
                                   _dueDate = null;
                                   _dueDateController.clear();
                                 }),
                               )
-                            : const Icon(Icons.calendar_today,
-                                color: Color(0xFF9E9E9E), size: 18),
+                            : const Icon(
+                                Icons.calendar_today,
+                                color: Color(0xFF9E9E9E),
+                                size: 18,
+                              ),
                       ),
                     ),
 
@@ -259,8 +259,9 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
                               Text(
                                 _priorityLabel[priority]!,
                                 style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
                             ],
                           ),
@@ -304,8 +305,7 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
             ),
             child: Text(
               _isEditing ? 'Update Task' : 'Add Task',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -316,69 +316,80 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
 
   // ── Label picker ──────────────────────────────────────────────────
   Widget _buildLabelPicker() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: _defaultLabels.map((label) {
-        final name = label['name'] as String;
-        final color = label['color'] as Color;
-        final isSelected = _selectedLabels.contains(name);
+    final labelController = Get.find<LabelController>();
 
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                _selectedLabels.remove(name);
-              } else {
-                _selectedLabels.add(name);
-              }
-            });
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: isSelected ? color : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected ? color : const Color(0xFFE0E0E0),
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: color.withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      )
-                    ]
-                  : [],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.local_offer_outlined,
-                    size: 14,
-                    color: isSelected ? Colors.white : color),
-                const SizedBox(width: 6),
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: isSelected ? Colors.white : Colors.blueGrey,
-                  ),
-                ),
-                if (isSelected) ...[
-                  const SizedBox(width: 6),
-                  const Icon(Icons.check, size: 14, color: Colors.white),
-                ],
-              ],
-            ),
-          ),
+    return Obx(() {
+      final labels = labelController.labels.toList();
+      if (labels.isEmpty) {
+        return const Text(
+          'No labels available. Create one from the dashboard.',
+          style: TextStyle(color: Colors.blueGrey, fontSize: 13),
         );
-      }).toList(),
-    );
+      }
+
+      return Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: labels.map((label) {
+          final isSelected = _selectedLabels.contains(label.id);
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                if (isSelected) {
+                  _selectedLabels.remove(label.id);
+                } else {
+                  _selectedLabels.add(label.id);
+                }
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? label.color : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? label.color : const Color(0xFFE0E0E0),
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: label.color.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.local_offer_outlined,
+                    size: 14,
+                    color: isSelected ? Colors.white : label.color,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    label.name,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected ? Colors.white : Colors.blueGrey,
+                    ),
+                  ),
+                  if (isSelected) ...[
+                    const SizedBox(width: 6),
+                    const Icon(Icons.check, size: 14, color: Colors.white),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    });
   }
 
   Widget _buildLabel(String text) {
@@ -399,8 +410,7 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
       hintStyle: const TextStyle(color: Color(0xFFBDBDBD), fontSize: 14),
       filled: true,
       fillColor: Colors.white,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -411,8 +421,7 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide:
-            const BorderSide(color: Color(0xFF666AF6), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF666AF6), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -420,8 +429,7 @@ class _AddIndependentTaskScreenState extends State<AddIndependentTaskScreen> {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide:
-            const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
       ),
     );
   }

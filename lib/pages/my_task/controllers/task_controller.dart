@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
+import 'package:todo_app/pages/settings/controllers/productivity_settings_controller.dart';
 import 'package:todo_app/pages/my_task/models/task_model.dart';
 import 'package:todo_app/pages/my_task/services/task_service.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskController extends GetxController {
   final TaskService _service = TaskService();
+  final ProductivitySettingsController _settings = Get.put(
+    ProductivitySettingsController(),
+  );
 
   // ── Observable state ──────────────────────────────────────────────
   final RxList<Task> tasks = <Task>[].obs;
@@ -85,6 +89,12 @@ class TaskController extends GetxController {
     }
   }
 
+  Future<void> deleteTasks(Iterable<Task> tasksToDelete) async {
+    for (final task in tasksToDelete) {
+      await deleteTask(task.id);
+    }
+  }
+
   // ── getter to filter task according to status ──────────────────────────────────────────────
   List<Task> get todoTasks =>
       tasks.where((t) => t.status == TaskStatus.todo).toList();
@@ -94,6 +104,12 @@ class TaskController extends GetxController {
 
   List<Task> get doneTasks =>
       tasks.where((t) => t.status == TaskStatus.done).toList();
+
+  List<Task> get activeTasks =>
+      tasks.where((task) => task.status != TaskStatus.done).toList();
+
+  List<Task> get visibleTasks =>
+      _settings.showCompletedTasks.value ? tasks.toList() : activeTasks;
 
   // getter to filters acccrodig to due date
   bool _isSameDay(DateTime date1, DateTime? date2) {
@@ -105,29 +121,42 @@ class TaskController extends GetxController {
 
   List<Task> get todayTasks {
     final now = DateTime.now();
-    return tasks.where((task) => _isSameDay(now, task.dueDate)).toList();
+    return visibleTasks.where((task) => _isSameDay(now, task.dueDate)).toList();
   }
+
+  List<Task> get noDueDateTasks =>
+      visibleTasks.where((task) => task.dueDate == null).toList();
 
   List<Task> get tomorrowTasks {
-  final tomorrow = DateTime.now().add(const Duration(days: 1));
-  return tasks.where((task) => _isSameDay(tomorrow, task.dueDate)).toList();
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    return visibleTasks
+        .where((task) => _isSameDay(tomorrow, task.dueDate))
+        .toList();
   }
 
-  List<Task> get thisWeekTasks{
+  List<Task> get thisWeekTasks {
     final now = DateTime.now();
-    final dayAfterTomorrow = DateTime(now.year, now.month, now.day).add(const Duration(days: 2));
+    final dayAfterTomorrow = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(const Duration(days: 2));
     final daysUntilSunday = 7 - now.weekday;
-    final endOfWeek = DateTime(now.year, now.month, now.day).add(Duration(days: daysUntilSunday, hours: 23, minutes: 59));
+    final endOfWeek = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(Duration(days: daysUntilSunday, hours: 23, minutes: 59));
 
-    return tasks.where((task){
-      if(task.dueDate == null) return false;
+    return visibleTasks.where((task) {
+      if (task.dueDate == null) return false;
 
-      return task.dueDate!.isAfter(dayAfterTomorrow.subtract(const Duration(seconds: 1))) &&
-           task.dueDate!.isBefore(endOfWeek.add(const Duration(seconds: 1)));
+      return task.dueDate!.isAfter(
+            dayAfterTomorrow.subtract(const Duration(seconds: 1)),
+          ) &&
+          task.dueDate!.isBefore(endOfWeek.add(const Duration(seconds: 1)));
     }).toList();
   }
-
-
 
   // ── Count getters (for dashboard status chips) ────────────────────
   int get todoCount => todoTasks.length;

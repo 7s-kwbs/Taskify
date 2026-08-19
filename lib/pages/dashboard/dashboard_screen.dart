@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/pages/dashboard/label_item_model.dart';
 import 'package:todo_app/pages/labels/controllers/label_controller.dart';
+import 'package:todo_app/pages/labels/model/label_model.dart';
 import 'package:todo_app/pages/labels/screeens/add_label_screen.dart';
 import 'package:todo_app/pages/labels/screeens/label_detail_screen.dart';
-import 'package:todo_app/pages/my_task/screens/my_task_screen.dart';
+import 'package:todo_app/pages/calendar/screens/calendar_screen.dart';
 import 'package:todo_app/pages/my_task/controllers/task_controller.dart';
+import 'package:todo_app/pages/my_task/models/task_model.dart';
+import 'package:todo_app/pages/my_task/screens/my_task_screen.dart';
 import 'package:todo_app/pages/projects/controllers/project_controller.dart';
 import 'package:todo_app/pages/projects/models/project_model.dart';
 import 'package:todo_app/pages/projects/screens/add_project_screen.dart';
 import 'package:todo_app/pages/projects/screens/project_detail.dart';
 import 'package:todo_app/pages/projects/tasks/controller/project_task_controller.dart';
+import 'package:todo_app/pages/reports/screens/reports_screen.dart';
 import 'package:todo_app/pages/settings/settings_screen.dart';
 import 'package:todo_app/widgets/dashboard_header.dart';
+import 'package:todo_app/pages/dashboard/status_detail_screen.dart';
+import 'package:todo_app/widgets/empty_state.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -27,6 +32,7 @@ class _DashboardPageState extends State<DashboardPage> {
   bool statusExpanded = true;
 
   late final ProjectController _projectController;
+  final labelController = Get.put(LabelController());
 
   @override
   void initState() {
@@ -34,17 +40,7 @@ class _DashboardPageState extends State<DashboardPage> {
     _projectController = Get.put(ProjectController(), permanent: false);
     Get.put(ProjectTaskController(), permanent: false);
     Get.put(TaskController(), permanent: false);
-    Get.put(LabelController(), permanent: false);
   }
-
-  // ── Hardcoded labels and statuses (until you build those features) ─
-  final List<LabelItem> labels = const [
-    LabelItem(color: Color(0xFF7C7CE0), title: 'Study', count: 5),
-    LabelItem(color: Color(0xFF445273), title: 'Sports', count: 2),
-    LabelItem(color: Color(0xFFE08A3C), title: 'Work', count: 2),
-    LabelItem(color: Color(0xFFE0B23C), title: 'Personal', count: 2),
-    LabelItem(color: Color(0xFF3CB17A), title: 'Habit', count: 3),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +69,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: _dashboardCard(
                           title: "Calendar",
                           icon: Icons.calendar_month,
-                          onTap: () {},
+                          onTap: () => Get.to(() => const CalendarScreen()),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -81,7 +77,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: _dashboardCard(
                           title: "Reports",
                           icon: Icons.view_kanban,
-                          onTap: () {},
+                          onTap: () => Get.to(() => const ReportsScreen()),
                         ),
                       ),
                     ],
@@ -108,27 +104,30 @@ class _DashboardPageState extends State<DashboardPage> {
                     onAdd: () => Get.to(() => AddLabelScreen()),
                   ),
                   if (labelsExpanded)
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final chipWidth = (constraints.maxWidth - 10) / 2;
-                        return Wrap(
-                          spacing: 10,
-                          runSpacing: 14,
-                          children: labels
-                              .map(
-                                (label) => SizedBox(
-                                  width: chipWidth,
-                                  child: Labelchip(
-                                    color: label.color,
-                                    title: label.title,
-                                    count: label.count,
+                    Obx(() {
+                      final labels = labelController.labels.toList();
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final chipWidth = (constraints.maxWidth - 10) / 2;
+                          return Wrap(
+                            spacing: 10,
+                            runSpacing: 14,
+                            children: labels
+                                .map(
+                                  (label) => SizedBox(
+                                    width: chipWidth,
+                                    child: Labelchip(
+                                      color: label.color,
+                                      title: label.name,
+                                      label: label,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      },
-                    ),
+                                )
+                                .toList(),
+                          );
+                        },
+                      );
+                    }),
 
                   // ── Status section ──
                   SectionHeader(
@@ -141,20 +140,35 @@ class _DashboardPageState extends State<DashboardPage> {
                   if (statusExpanded)
                     Obx(() {
                       final taskController = Get.find<TaskController>();
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: StatusChip(
-                                color: const Color(0xFFE4572E), 
-                                title: "To do",
-                                count: taskController.todoCount,
-                              ),
-                            )
-                          ],
-                        ),
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: StatusChip(
+                              color: const Color(0xFFE4572E),
+                              title: "To do",
+                              count: taskController.todoCount,
+                              status: TaskStatus.todo,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: StatusChip(
+                              color: const Color(0xFFFFB347),
+                              title: "Doing",
+                              count: taskController.doingCount,
+                              status: TaskStatus.doing,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: StatusChip(
+                              color: const Color(0xFF4CAF82),
+                              title: "Done",
+                              count: taskController.doneCount,
+                              status: TaskStatus.done,
+                            ),
+                          ),
+                        ],
                       );
                     }),
                 ],
@@ -181,33 +195,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
       // empty state
       if (_projectController.projects.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Center(
-            child: Column(
-              children: [
-                Icon(
-                  Icons.folder_open_outlined,
-                  size: 48,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'No projects yet',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Tap + to create your first project',
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
-                ),
-              ],
-            ),
-          ),
+        return EmptyStateWidget(
+          icon: Icons.folder_open_outlined,
+          title: 'No projects yet',
+          subtitle: 'Create your first project to get started',
+          actionLabel: 'Add project',
+          onAction: () => Get.to(() => const AddProjectScreen()),
         );
       }
 
@@ -375,57 +368,73 @@ class StatusChip extends StatelessWidget {
   final Color color;
   final String title;
   final int count;
-  const StatusChip({super.key, required this.color, required this.title, required this.count});
+  final TaskStatus status;
+
+  const StatusChip({
+    super.key,
+    required this.color,
+    required this.title,
+    required this.count,
+    required this.status,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.blueGrey,
+    return InkWell(
+      onTap: () => Get.to(() => StatusDetailScreen(status: status)),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-          ),
-          const SizedBox(width: 8,),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(10)
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
-            child: Text(
-              "$count",
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: color,
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                title,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blueGrey,
+                ),
               ),
             ),
-          )
-        ],
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                "$count",
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -433,21 +442,21 @@ class StatusChip extends StatelessWidget {
 
 // ── Labelchip ──────────────────────────────────────────────────────
 class Labelchip extends StatelessWidget {
+  final Label label;
   final String title;
   final Color color;
-  final int count;
 
   const Labelchip({
     super.key,
+    required this.label,
     required this.color,
     required this.title,
-    required this.count,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Get.to(() => LabelDetail()),
+      onTap: () => Get.to(() => LabelDetail(label: label)),
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -476,14 +485,14 @@ class Labelchip extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey.shade400,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            // Text(
+            //   '$count',
+            //   style: TextStyle(
+            //     fontSize: 15,
+            //     color: Colors.grey.shade400,
+            //     fontWeight: FontWeight.w500,
+            //   ),
+            // ),
           ],
         ),
       ),
