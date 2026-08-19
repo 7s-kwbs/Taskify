@@ -21,7 +21,6 @@ class AuthController extends GetxController {
   String get displayName => currentUser.value?.displayName ?? 'User'; // ← add
   String get email => currentUser.value?.email ?? '';
 
-
   @override
   void onInit() {
     super.onInit();
@@ -79,6 +78,39 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<bool> updateProfile({
+    required String name,
+    required String email,
+  }) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      final trimmedName = name.trim();
+      final trimmedEmail = email.trim();
+      if (trimmedName.isEmpty || trimmedEmail.isEmpty) return false;
+
+      if (user.displayName != trimmedName) {
+        await user.updateDisplayName(trimmedName);
+      }
+      if (user.email != trimmedEmail) {
+        await user.updateEmail(trimmedEmail);
+      }
+
+      await user.reload();
+      currentUser.value = _auth.currentUser;
+      return true;
+    } on FirebaseAuthException catch (e) {
+      errorMessage.value = _parseError(e.code);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   //Logout
   Future<void> logout() async {
     await Get.delete<ProjectController>();
@@ -86,7 +118,7 @@ class AuthController extends GetxController {
     await Get.delete<TaskController>();
     await Get.delete<LabelController>();
 
-    await _auth.signOut();        
+    await _auth.signOut();
   }
 
   //Password reset
